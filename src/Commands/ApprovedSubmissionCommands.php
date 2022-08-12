@@ -98,7 +98,7 @@ class ApprovedSubmissionCommands extends DrushCommands {
     $webformChoices = ["honors_thesis_submission","research_repository_submission","university_records_submission"];
 
     if (!in_array($webform, $webformChoices)) {
-      $this->logger()->warning(dt('You passed an incorrect parameter value. Accepted values are: "honors_these_submision","research_repository_submission","university_records_submission"'));
+      $this->logger()->warning(dt('You passed an incorrect parameter value. Accepted values are: "honors_thesis_submission","research_repository_submission","university_records_submission"'));
     }
     else {
       if ($options['status']) {
