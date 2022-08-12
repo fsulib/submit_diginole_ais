@@ -1,0 +1,27 @@
+{
+  "name": "fsulib/submit_diginole_ais",
+  "description": "A module for generating AIS packages from approved DigiNole submissions",
+  "type": "drupal-custom-module",
+  "keywords": ["Drupal", "DigiNole"],
+  "homepage": "https://github.com/fsulib/submit_diginole_ais",
+  "license": "GPL-2.0+",
+  "authors": [
+    {
+      "name": "Brian Arsenault",
+      "email": "barsenault@fsu.edu",
+      "role": "Maintainer"
+    },
+    {
+      "name": "Bryan J. Brown",
+      "email": "bjbrown@fsu.edu",
+      "role": "Maintainer"
+    }
+  ],
+  "extra": {
+    "drush": {
+      "services": {
+        "drush.services.yml": "^9 | ^10"
+      }
+    }
+  }
+}

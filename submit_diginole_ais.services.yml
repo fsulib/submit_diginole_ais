@@ -1,0 +1,10 @@
+services:
+  submit_diginole_ais.commands:
+    class: \Drupal\submit_diginole_ais\Commands\ApprovedSubmissionCommands
+    tags:
+      - { name: drush.command }
+    arguments: ['@submit_diginole_ais.submission_service', '@entity_type.manager', '@logger.factory', '@twig', '@file.repository', '@file_system']
+
+  submit_diginole_ais.submission_service:
+    class: \Drupal\submit_diginole_ais\DiginoleSubmissionService
+    arguments: ['@webform_query']

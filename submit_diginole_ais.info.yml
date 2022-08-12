@@ -1,0 +1,9 @@
+name: Submit DigiNole AIS
+description: Generates AIS packages from approved submissions
+package: DigiNole
+type: module
+core_version_requirement: ^9
+
+dependencies:
+  - webform:webform
+  - webform:webform_query

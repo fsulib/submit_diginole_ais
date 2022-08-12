@@ -1,0 +1,20 @@
+Form: {{ item.form_name }} -- Submission # {{ item.sid }}
+
+{% for field, value in item %}
+{{ field }}:
+{% if value is iterable %}
+{% for subs in value %}
+--Index: {{ loop.index }}
+{% if subs is iterable %}
+{% for key, sub in subs %}
+-- --{{ key }}:</strong> {{ sub }}
+{% endfor %}
+{% else %}
+--{{ subs }}</li>
+{% endif %}
+{% endfor %}
+{% else %}
+--{{ value }}
+{% endif %}
+{% endfor %}
+
