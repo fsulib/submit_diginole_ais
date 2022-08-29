@@ -3,8 +3,12 @@ services:
     class: \Drupal\submit_diginole_ais\Commands\ApprovedSubmissionCommands
     tags:
       - { name: drush.command }
-    arguments: ['@submit_diginole_ais.submission_service', '@entity_type.manager', '@logger.factory', '@messenger', '@twig', '@file.repository', '@file_system']
+    arguments: ['@submit_diginole_ais.submission_service', '@entity_type.manager', '@logger.factory', '@messenger', '@twig', '@submit_diginole_ais.file_service']
 
   submit_diginole_ais.submission_service:
     class: \Drupal\submit_diginole_ais\DiginoleSubmissionService
     arguments: ['@webform_query']
+
+  submit_diginole_ais.file_service:
+    class: \Drupal\submit_diginole_ais\SubmitDiginoleFileService
+    arguments: ['@file_system', '@file.repository']

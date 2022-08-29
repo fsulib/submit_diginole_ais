@@ -2,14 +2,14 @@
 namespace Drupal\submit_diginole_ais\Commands;
 
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\Template\TwigEnvironment;
 use Drupal\Core\Messenger\Messenger;
 use Drush\Commands\DrushCommands;
 use Drupal\submit_diginole_ais\DiginoleSubmissionService;
+use Drupal\submit_diginole_ais\SubmitDiginoleFileService;
 use Drupal\submit_diginole_ais\Utility\SubmitDiginoleManifestHelper;
-use Drupal\file\FileRepositoryInterface;
+
 
 /**
  * A Drush commandfile for processing approved DigiNole submissions.
@@ -52,18 +52,11 @@ class ApprovedSubmissionCommands extends DrushCommands {
   protected $twigService;
 
   /**
-   * File repository interface
+   * The Submit DigiNole File service.
    *
-   * @var \Drupal\file\FileRepositoryInterface;
+   * @var \Drupal\submit_diginole_ais\SubmitDiginoleFileService
    */
-  protected $fileRepository;
-
-  /**
-   * File System Interface
-   *
-   * @var \Drupal\Core\File\FileSystemInterface
-   */
-  protected $fileSystem;
+  protected $submitDiginoleFileService;
 
   /**
    * Constructs a new ApprovedSubmissionCommands object.
@@ -78,10 +71,8 @@ class ApprovedSubmissionCommands extends DrushCommands {
    *  Messenger Service
    * @param \Drupal\Core\Template\TwigEnvironment $twigService
    *  Twig Service
-   * @param \Drupal\file\FileRepositoryInterface $fileRepository
-   *  File repository service
-   * @param \Drupal\Core\File\FileSystemInterface $fileSystem
-   *  File system interface
+   * @param \Drupal\submit_diginole_ais\SubmitDiginoleFileService $submitDiginoleFileService
+   *  Submit DigiNole File Service
    */
   public function __construct(
     DiginoleSubmissionService $diginoleSubmissionService,
@@ -89,16 +80,14 @@ class ApprovedSubmissionCommands extends DrushCommands {
     LoggerChannelFactoryInterface $loggerChannelFactory,
     Messenger $messenger,
     TwigEnvironment $twigService,
-    FileRepositoryInterface $fileRepository,
-    FileSystemInterface $fileSystem
+    SubmitDiginoleFileService $submitDiginoleFileService
     ) {
     $this->diginoleSubmissionService = $diginoleSubmissionService;
     $this->entityTypeManager = $entityTypeManager;
     $this->loggerChannelFactory = $loggerChannelFactory;
     $this->messenger = $messenger;
     $this->twigService = $twigService;
-    $this->fileRepository = $fileRepository;
-    $this->fileSystem = $fileSystem;
+    $this->submitDiginoleFileService = $submitDiginoleFileService;
   }
 
   /**
@@ -146,14 +135,24 @@ class ApprovedSubmissionCommands extends DrushCommands {
         $rendered_output = $this->twigService->render('modules/custom/submit_diginole_ais/templates/' . $template, ['item' => $template_data]);
 
         $current_time = time();
-        $filename = $form_name . '-' . $uuid . '-' . $current_time . '.xml';
-        if ($this->fileSystem->prepareDirectory($path, FileSystemInterface::CREATE_DIRECTORY)) {
-          $this->fileRepository->writeData($rendered_output, $path . $filename, FileSystemInterface::EXISTS_REPLACE);
+        $destination_folder = $path . $uuid . '/';
+        $filename = $form_name . '-' . $uuid . '.xml';
+        $file_result = $this->submitDiginoleFileService->writeContentToFile($rendered_output, $destination_folder, $filename);
+
+        if (empty($file_result)) {
           $this->loggerChannelFactory->get('ais_submissions')->info(dt('Saved file ' . $filename));
         }
         else {
           $this->loggerChannelFactory->get('ais_submissions')->error(dt('Unable to save file ' . $filename));
         }
+
+        //move files
+        if ($webform == 'honors_thesis_submission') {
+          foreach ($submission->getData()['upload_honors_thesis'] as $fid) {
+            $this->submitDiginoleFileService->transferSubmissionFile($fid, $destination_folder);
+          }
+        }
+
       }
 
     }
