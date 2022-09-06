@@ -36,8 +36,6 @@ class DiginoleSubmissionService {
     return $results;
   }
 
-
-
   public function getTemplateData(WebformSubmission $submission) {
     $submission_type = $submission->get('webform_id')->target_id;
     switch ($submission_type) {

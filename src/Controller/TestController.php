@@ -39,9 +39,9 @@ class TestController extends ControllerBase {
       $submission = $this->entityTypeManager->getStorage('webform_submission')->load($sid);
       $form_name = $submission->get('webform_id')->target_id;
 
-      dd($submission->getData()['upload_honors_thesis']);
 
       $submission_data = $submission->getData();
+      dd($submission_data);
       $submission_data['sid'] = $sid;
       $submission_data['form_name'] = $form_name;
       // $data contains each submission

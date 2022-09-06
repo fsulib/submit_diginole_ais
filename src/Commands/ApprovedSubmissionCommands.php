@@ -8,7 +8,7 @@ use Drupal\Core\Messenger\Messenger;
 use Drush\Commands\DrushCommands;
 use Drupal\submit_diginole_ais\DiginoleSubmissionService;
 use Drupal\submit_diginole_ais\SubmitDiginoleFileService;
-use Drupal\submit_diginole_ais\Utility\SubmitDiginoleManifestHelper;
+use Drupal\submit_diginole_ais\SubmitDiginoleManifestService;
 
 
 /**
@@ -16,6 +16,9 @@ use Drupal\submit_diginole_ais\Utility\SubmitDiginoleManifestHelper;
  *
  */
 class ApprovedSubmissionCommands extends DrushCommands {
+
+  const TEMPLATE_PATH = 'modules/custom/submit_diginole_ais/templates/';
+
   /**
    * THe DigiNole Submission service.
    *
@@ -40,7 +43,7 @@ class ApprovedSubmissionCommands extends DrushCommands {
   /**
    * Drupal messenger service
    *
-   * @var \Drupal\Core\Messsenger\Messenger
+   * @var \Drupal\Core\Messenger\Messenger
    */
   protected $messenger;
 
@@ -59,6 +62,13 @@ class ApprovedSubmissionCommands extends DrushCommands {
   protected $submitDiginoleFileService;
 
   /**
+   * The Submit DigiNole Manifest service.
+   *
+   * @var \Drupal\submit_diginole_ais\SubmitDiginoleManifestService
+   */
+  protected $submitDiginoleManifestService;
+
+  /**
    * Constructs a new ApprovedSubmissionCommands object.
    *
    * @param \Drupal\submit_diginole_ais\DiginoleSubmissionService $diginoleSubmissionService
@@ -67,12 +77,14 @@ class ApprovedSubmissionCommands extends DrushCommands {
    *  Entity type service
    * @param \Drupal\Core\Logger\LoggerChannelFactoryInterface $loggerChannelFactory
    *  Logger service
-   * @param \Drupal\Core\Messsenger\Messenger $messenger
+   * @param \Drupal\Core\Messenger\Messenger $messenger
    *  Messenger Service
    * @param \Drupal\Core\Template\TwigEnvironment $twigService
    *  Twig Service
    * @param \Drupal\submit_diginole_ais\SubmitDiginoleFileService $submitDiginoleFileService
    *  Submit DigiNole File Service
+   * @param \Drupal\submit_diginole_ais\SubmitDiginoleManifestService $submitDiginoleManifestService
+   *  Submit DigiNole Manifest Service
    */
   public function __construct(
     DiginoleSubmissionService $diginoleSubmissionService,
@@ -80,7 +92,8 @@ class ApprovedSubmissionCommands extends DrushCommands {
     LoggerChannelFactoryInterface $loggerChannelFactory,
     Messenger $messenger,
     TwigEnvironment $twigService,
-    SubmitDiginoleFileService $submitDiginoleFileService
+    SubmitDiginoleFileService $submitDiginoleFileService,
+    SubmitDiginoleManifestService $submitDiginoleManifestService
     ) {
     $this->diginoleSubmissionService = $diginoleSubmissionService;
     $this->entityTypeManager = $entityTypeManager;
@@ -88,6 +101,7 @@ class ApprovedSubmissionCommands extends DrushCommands {
     $this->messenger = $messenger;
     $this->twigService = $twigService;
     $this->submitDiginoleFileService = $submitDiginoleFileService;
+    $this->submitDiginoleManifestService = $submitDiginoleManifestService;
   }
 
   /**
@@ -127,32 +141,55 @@ class ApprovedSubmissionCommands extends DrushCommands {
         $submission = $this->entityTypeManager->getStorage('webform_submission')->load($sid);
         $form_name = $submission->get('webform_id')->target_id;
         $uuid = $submission->uuid();
+        $iid = $form_name . '-' . $uuid;
+
 
         $template = str_replace("_","-",$form_name) . '-mods.html.twig';
         $template_data = $this->diginoleSubmissionService->getTemplateData($submission);
 
         // $template_data contains each submission
-        $rendered_output = $this->twigService->render('modules/custom/submit_diginole_ais/templates/' . $template, ['item' => $template_data]);
+        $rendered_output = $this->twigService->render(self::TEMPLATE_PATH . $template, ['item' => $template_data]);
 
-        $current_time = time();
-        $destination_folder = $path . $uuid . '/';
-        $filename = $form_name . '-' . $uuid . '.xml';
-        $file_result = $this->submitDiginoleFileService->writeContentToFile($rendered_output, $destination_folder, $filename);
+        $destination_folder = $path . $iid . '/';
+        $mods_filename = $iid . '.xml';
+        $mods_file_result = $this->submitDiginoleFileService->writeContentToFile($rendered_output, $destination_folder, $mods_filename);
 
-        if (empty($file_result)) {
-          $this->loggerChannelFactory->get('ais_submissions')->info(dt('Saved file ' . $filename));
+        if (empty($mods_file_result)) {
+          $message = 'Saved file ' . $mods_filename;
+          $this->loggerChannelFactory->get('ais_submissions')->info(dt($message));
+          $this->messenger->addMessage($message);
         }
         else {
-          $this->loggerChannelFactory->get('ais_submissions')->error(dt('Unable to save file ' . $filename));
+          $message = 'Unable to save file ' . $mods_filename;
+          $this->loggerChannelFactory->get('ais_submissions')->error(dt($message));
+          $this->messenger->addError($message);
         }
 
-        //move files
+        // move files
         if ($webform == 'honors_thesis_submission') {
           foreach ($submission->getData()['upload_honors_thesis'] as $fid) {
             $this->submitDiginoleFileService->transferSubmissionFile($fid, $destination_folder);
           }
         }
 
+        // add manifest
+        $manifest_template = $this->submitDiginoleManifestService->getManifestTemplate();
+        $manifest_data = $this->submitDiginoleManifestService->getManifestContents($submission);
+        $manifest_filename = $this->submitDiginoleManifestService->getManifestFilename();
+
+        $rendered_manifest = $this->twigService->render(self::TEMPLATE_PATH . $manifest_template, ['manifest' => $manifest_data]);
+        $manifest_file_result = $this->submitDiginoleFileService->writeContentToFile($rendered_manifest, $destination_folder, $manifest_filename);
+
+        if (empty($manifest_file_result)) {
+          $message = 'Saved file ' . $iid . '/' . $manifest_filename;
+          $this->loggerChannelFactory->get('ais_submissions')->info(dt($message));
+          $this->messenger->addMessage($message);
+        }
+        else {
+          $message = 'Unable to save file ' . $iid . '/' . $manifest_filename;
+          $this->loggerChannelFactory->get('ais_submissions')->error(dt($message));
+          $this->messenger->addError($message);
+        }
       }
 
     }

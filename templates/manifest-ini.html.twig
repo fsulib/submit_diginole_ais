@@ -1,0 +1,15 @@
+[package]
+submitter_email = {{ manifest.submitter_email }}
+content_model = {{ manifest.content_model }}
+parent_collection = {{ manifest.parent_collection }}
+{% if manifest.ip_embargo|length > 0 %}
+
+[ip_embargo]
+ip_expiry: {{ manifest.ip_embargo }}
+{% endif %}
+{% if manifest.scholar_expiry|length > 0 %}
+
+[scholar_embargo]
+scholar_expiry: {{ manifest.scholar_expiry }}
+scholar_type: {{ manifest.scholar_type }}
+{% endif %}

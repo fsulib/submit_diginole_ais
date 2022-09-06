@@ -22,8 +22,12 @@ namespace Drupal\submit_diginole_ais\Utility;
         "3d_object" => "islandora:binaryObjectCModel",
         "audio" => "islandora:sp-audioCModel",
         "book" => "ir:citationCModel",
+        "book_chapter" => "ir:citationCModel",
         "capstone_project" => "ir:thesisCModel",
         "conference" => "ir:citationCModel",
+        "conference_paper" => "ir:citationCModel",
+        "conference_poster" => "ir:citationCModel",
+        "conference_presentation" => "ir:citationCModel",
         "data_set" => "islandora:binaryObjectCModel",
         "doctoral_nursing_program_capstone_project" => "ir:thesisCModel",
         "editorial" => "ir:citationCModel",
@@ -31,7 +35,11 @@ namespace Drupal\submit_diginole_ais\Utility;
         "minimal" => "",
         "other" => "",
         "report" => "ir:citationCModel",
+        "policy" => "ir:citationCModel",
+        "research" => "ir:citationCModel",
+        "technical" => "ir:citationCModel",
         "review" => "ir:citationCModel",
+        "book_review" => "ir:citationCModel",
         "video" => "islandora:sp_videoCModel",
         "working_paper" => "ir:citationCModel",
       ];
@@ -70,8 +78,4 @@ namespace Drupal\submit_diginole_ais\Utility;
      return $dsidCrosswalk[$submission_type];
   }
 
-  public function getEmbargoExpiry(string $embargo_period) {
-    // TODO: calculate embargo end date
-    return null;
-  }
  }
