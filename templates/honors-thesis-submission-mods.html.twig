@@ -25,7 +25,9 @@
   {% if item.abstract|length > 0 %}
   <abstract>{{ item.abstract|escape('html') }}</abstract>
   {% endif %}
-  <identifier type="IID">{# FSU_libsubv1_scholarship_submission_1587758780_8aa7dadd #}</identifier>
+  {% if item.identifier_iid|length > 0 %}
+  <identifier type="IID">{{ item.identifier_iid }}</identifier>
+  {% endif %}
   {% if item.note_keywords|length > 0 %}
   <note displayLabel="Keywords">{{ item.note_keywords }}</note>
   {% endif %}
@@ -42,9 +44,21 @@
     <languageTerm type="text">English</languageTerm>
     <languageTerm type="code" authority="iso639-2b">eng</languageTerm>
   </language>
+  <physicalDescription>
+    <form authority="rdamedia" type="RDA media terms">computer</form>
+    <form authority="rdacarrier" type="RDA carrier terms">online resource</form>
+    <extent>1 online resource</extent>
+    <digitalOrigin>born digital</digitalOrigin>
+    <internetMediaType>{# item.internetMediaType #}</internetMediaType>
+  </physicalDescription>
   <recordInfo>
     <recordCreationDate encoding="w3cdtf">{{ "now"|date("Y-m-d") }}</recordCreationDate>
     <descriptionStandard>rda</descriptionStandard>
   </recordInfo>
+  {% if item.location_purl|length > 0 %}
+  <location displayLabel="purl">
+    <url>{{ item.location_purl }}</url>
+  </location>
+  {% endif %}
 </mods:mods>
 

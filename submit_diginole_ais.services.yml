@@ -11,7 +11,7 @@ services:
 
   submit_diginole_ais.file_service:
     class: \Drupal\submit_diginole_ais\SubmitDiginoleFileService
-    arguments: ['@file_system', '@file.repository']
+    arguments: ['@file_system', '@file.repository', '@submit_diginole_ais.submission_service']
 
   submit_diginole_ais.manifest_service:
     class: \Drupal\submit_diginole_ais\SubmitDiginoleManifestService

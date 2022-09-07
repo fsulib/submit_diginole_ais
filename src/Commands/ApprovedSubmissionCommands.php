@@ -19,6 +19,8 @@ class ApprovedSubmissionCommands extends DrushCommands {
 
   const TEMPLATE_PATH = 'modules/custom/submit_diginole_ais/templates/';
 
+  const BASE_PATH = 'temporary://ais_submissions/';
+
   /**
    * THe DigiNole Submission service.
    *
@@ -127,9 +129,6 @@ class ApprovedSubmissionCommands extends DrushCommands {
       if ($options['status']) {
         $status = $options['status'];
       }
-      // currently public for devlopment
-      $path = "public://ais_submissions/";
-      // $path = "temporary://ais_submissions/";
       $sids = $this->diginoleSubmissionService->getSidsByFormAndStatus($webform, $status);
       if (count($sids) > 0) {
         $this->messenger->addMessage('Begin processing '. count($sids) . ' submissions.');
@@ -139,18 +138,16 @@ class ApprovedSubmissionCommands extends DrushCommands {
       }
       foreach ($sids as $sid) {
         $submission = $this->entityTypeManager->getStorage('webform_submission')->load($sid);
-        $form_name = $submission->get('webform_id')->target_id;
-        $uuid = $submission->uuid();
-        $iid = $form_name . '-' . $uuid;
 
+        $iid = $this->diginoleSubmissionService->getIID($submission);
 
-        $template = str_replace("_","-",$form_name) . '-mods.html.twig';
+        $template = $this->diginoleSubmissionService->getSubmissionTemplate($submission);
         $template_data = $this->diginoleSubmissionService->getTemplateData($submission);
 
         // $template_data contains each submission
         $rendered_output = $this->twigService->render(self::TEMPLATE_PATH . $template, ['item' => $template_data]);
 
-        $destination_folder = $path . $iid . '/';
+        $destination_folder = self::BASE_PATH . $iid . '/';
         $mods_filename = $iid . '.xml';
         $mods_file_result = $this->submitDiginoleFileService->writeContentToFile($rendered_output, $destination_folder, $mods_filename);
 
@@ -168,7 +165,7 @@ class ApprovedSubmissionCommands extends DrushCommands {
         // move files
         if ($webform == 'honors_thesis_submission') {
           foreach ($submission->getData()['upload_honors_thesis'] as $fid) {
-            $this->submitDiginoleFileService->transferSubmissionFile($fid, $destination_folder);
+            $this->submitDiginoleFileService->transferSubmissionFile($fid, $destination_folder, $iid);
           }
         }
 

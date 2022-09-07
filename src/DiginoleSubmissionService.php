@@ -2,6 +2,7 @@
 
 namespace Drupal\submit_diginole_ais;
 
+use Drupal\file\Entity\File;
 use Drupal\webform\Entity\WebformSubmission;
 use Drupal\webform_query\WebformQuery;
 use Drupal\submit_diginole_ais\Utility\SubmitDiginoleSubmissionHelper;
@@ -36,6 +37,29 @@ class DiginoleSubmissionService {
     return $results;
   }
 
+  public function getIID(WebformSubmission $submission) {
+    $form_name = $submission->get('webform_id')->target_id;
+    $uuid = $submission->uuid();
+    $iid = $form_name . '-' . $uuid;
+
+    return $iid;
+  }
+
+  public function getSubmissionTemplate(WebformSubmission $submission) {
+    $form_name = $submission->get('webform_id')->target_id;
+    $template = str_replace("_","-",$form_name) . '-mods.html.twig';
+
+    return $template;
+  }
+
+  public function getMimeTypeFromFID($fid) {
+    $file = File::load($fid);
+    $filename = $file->getFileName();
+    $mime_type = mime_content_type($filename);
+
+    return $mime_type;
+  }
+
   public function getTemplateData(WebformSubmission $submission) {
     $submission_type = $submission->get('webform_id')->target_id;
     switch ($submission_type) {
@@ -57,8 +81,10 @@ class DiginoleSubmissionService {
   protected function getHonorsThesisData(WebformSubmission $submission) {
     $template_data = $this->getCommonData($submission);
     $submission_data = $submission->getData();
+    //$fid = $submission_data['upload_honors_thesis'];
 
     $template_data['indentifier_doi'] = $submission_data['if_there_is_already_a_doi_associated_with_this_item_please_enter'];
+    //$template_data['internetMediaType'] = $this->getMimeTypeFromFID($fid);
 
     return $template_data;
   }
@@ -94,6 +120,9 @@ class DiginoleSubmissionService {
     $template_data['note_publicationNote'] = $submission_data['publication_note'];
     $template_data['accessCondition_text'] = SubmitDiginoleSubmissionHelper::getLicenseLabel($submission_data['license']);
     $template_data['accessCondition_xlink'] = SubmitDiginoleSubmissionHelper::getLicenseUrl($submission_data['license']);
+
+    $template_data['location_purl'] = $submission_data['diginole_purl'];
+    $template_data['identifier_iid'] = $this->getIID($submission);
 
     return $template_data;
   }
