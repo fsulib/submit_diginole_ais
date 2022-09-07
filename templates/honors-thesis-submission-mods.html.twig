@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <mods:mods xmlns="http://www.loc.gov/mods/v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:flvc="info:flvc/manifest/v1" xmlns:mods="http://www.loc.gov/mods/v3" xmlns:dcterms="http://purl.org/dc/terms/" xsi:schemaLocation="http://www.loc.gov/standards/mods/v3/mods-3-4.xsd" version="3.4">
   <titleInfo lang="eng">
-    <title>{{ item.titleInfo_title|escape('html_attr') }}</title>
-    <subTitle>{{ item.titleInfo_subTitle|escape('html_attr') }}</subTitle>
+    <title>{{ item.titleInfo_title|escape('html') }}</title>
+    <subTitle>{{ item.titleInfo_subTitle|escape('html') }}</subTitle>
   </titleInfo>
   {% for author in item.author %}
   <name type="personal" authority="local">
     <namePart type="given">{{ author.name_namePart_given }}</namePart>
     <namePart type="family">{{ author.name_namePart_family }}</namePart>
     {% if author.name_affiliation|length > 0 %}
-    <affiliation>{{ author.name_affiliation|escape('html_attr') }}</affiliation>
+    <affiliation>{{ author.name_affiliation|escape('html') }}</affiliation>
     {% endif %}
     <role>
       <roleTerm authority="rda" type="text">author</roleTerm>
@@ -23,14 +23,14 @@
   </originInfo>
   {% endif %}
   {% if item.abstract|length > 0 %}
-  <abstract>{{ item.abstract|escape('html_attr') }}</abstract>
+  <abstract>{{ item.abstract|escape('html') }}</abstract>
   {% endif %}
   <identifier type="IID">{# FSU_libsubv1_scholarship_submission_1587758780_8aa7dadd #}</identifier>
   {% if item.note_keywords|length > 0 %}
   <note displayLabel="Keywords">{{ item.note_keywords }}</note>
   {% endif %}
   {% if item.accessCondition_text|length > 0 %}
-  <accessCondition type="use and reproduction" xlink:href="{{ item.accessCondition_xlink }}">{{ item.accessCondition_text|escape('html_attr') }}</accessCondition>
+  <accessCondition type="use and reproduction" xlink:href="{{ item.accessCondition_xlink }}">{{ item.accessCondition_text|escape('html') }}</accessCondition>
   {% endif %}
   <extension>
     <flvc:flvc>
