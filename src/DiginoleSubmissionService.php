@@ -113,6 +113,7 @@ class DiginoleSubmissionService {
     foreach ($submission_data['author'] as $delta => $author) {
       $template_data['author'][$delta]['name_namePart_given'] = $author['author_first_name'] . ' ' . $author['author_middle_name'];
       $template_data['author'][$delta]['name_namePart_family'] = $author['author_last_name'];
+      $template_data['author'][$delta]['name_nameIdentifier_orcid'] = $author['author_orcid'];
       $template_data['author'][$delta]['name_affiliation'] = $author['author_institution'];
     }
     $template_data['note_keywords'] = $submission_data['keywords'];
@@ -123,6 +124,7 @@ class DiginoleSubmissionService {
 
     $template_data['location_purl'] = $submission_data['diginole_purl'];
     $template_data['identifier_iid'] = $this->getIID($submission);
+    $template_data['note_grantNumber'] = $submission_data['grant_number'];
 
     return $template_data;
   }

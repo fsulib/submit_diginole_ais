@@ -8,32 +8,44 @@
   <name type="personal" authority="local">
     <namePart type="given">{{ author.name_namePart_given }}</namePart>
     <namePart type="family">{{ author.name_namePart_family }}</namePart>
-    {% if author.name_affiliation|length > 0 %}
+    {%~ if author.name_affiliation|length > 0 %}
     <affiliation>{{ author.name_affiliation|escape('html') }}</affiliation>
-    {% endif %}
+    {%~ endif %}
+    {%~ if author.name_nameIdentifier_orcid|length > 0 %}
+    <nameIdentifier type="orcid">{{ author.name_nameIdentifier_orcid|escape('html') }}</nameIdentifier>
+    {%~ endif %}
     <role>
       <roleTerm authority="rda" type="text">author</roleTerm>
       <roleTerm authority="marcrelator" type="code">aut</roleTerm>
     </role>
   </name>
   {% endfor %}
-  {% if item.originInfo_dateIssued|length > 0 %}
+  {%~ if item.originInfo_dateIssued|length > 0 -%}
   <originInfo>
     <dateIssued encoding="w3cdtf" keyDate="yes">{{ item.originInfo_dateIssued }}</dateIssued>
   </originInfo>
-  {% endif %}
-  {% if item.abstract|length > 0 %}
+  {%~ endif %}
+  {%~ if item.abstract|length > 0 %}
   <abstract>{{ item.abstract|escape('html') }}</abstract>
-  {% endif %}
-  {% if item.identifier_iid|length > 0 %}
+  {%~ endif %}
+  {%~ if item.identifier_iid|length > 0 %}
   <identifier type="IID">{{ item.identifier_iid }}</identifier>
-  {% endif %}
-  {% if item.note_keywords|length > 0 %}
+  {%~ endif %}
+  {%~ if item.note_keywords|length > 0 %}
   <note displayLabel="Keywords">{{ item.note_keywords }}</note>
-  {% endif %}
-  {% if item.accessCondition_text|length > 0 %}
+  {%~ endif %}
+  {%~ if item.note_publicationNote|length > 0 %}
+  <note displayLabel="Publication Note">{{ item.note_publicationNote }}</note>
+  {%~ endif %}
+  {%~ if item.note_grantNumber|length > 0 %}
+  <note displayLabel="Grant Number">{{ item.note_grantNumber }}</note>
+  {%~ endif %}
+  {%~ if item.indentifier_doi|length > 0 %}
+  <identifier type="DOI">{{ item.indentifier_doi }}</identifier>
+  {%~ endif %}
+  {%~ if item.accessCondition_text|length > 0 %}
   <accessCondition type="use and reproduction" xlink:href="{{ item.accessCondition_xlink }}">{{ item.accessCondition_text|escape('html') }}</accessCondition>
-  {% endif %}
+  {%~ endif %}
   <extension>
     <flvc:flvc>
       <flvc:owningInstitution>FSU</flvc:owningInstitution>
@@ -55,10 +67,10 @@
     <recordCreationDate encoding="w3cdtf">{{ "now"|date("Y-m-d") }}</recordCreationDate>
     <descriptionStandard>rda</descriptionStandard>
   </recordInfo>
-  {% if item.location_purl|length > 0 %}
+  {%~ if item.location_purl|length > 0 %}
   <location displayLabel="purl">
     <url>{{ item.location_purl }}</url>
   </location>
-  {% endif %}
+  {%~ endif %}
 </mods:mods>
 
