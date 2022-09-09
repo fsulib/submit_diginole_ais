@@ -70,6 +70,7 @@ class SubmitDiginoleFileService {
 
     $this->fileSystem->prepareDirectory($destination, FileSystemInterface::CREATE_DIRECTORY);
     $this->fileRepository->copy($original_file, $destination . $new_name, FileSystemInterface::EXISTS_REPLACE);
+    return $new_name;
   }
 
   /**
@@ -92,11 +93,12 @@ class SubmitDiginoleFileService {
    *
    * @param string $iid
    *   IID of submission
+   * @param string $filename
+   *   Name of file in package 
    * @param array $submission_data
    *   Data from submission entity 
    */
-  public function applyCoverpageToFile($iid, $submission_data) {
-
+  public function applyCoverpageToFile($iid, $filename, $submission_data) {
     $coverpage_formatted_title = !empty($submission_data['submission_subtitle']) ? "{$submission_data['submission_title']}: {$submission_data['submission_subtitle']}" : $submission_data['submission_title'];
     $coverpage_formatted_year = date('Y', strtotime($submission_data['date_of_submission']));
     $coverpage_formatted_author_names = array();
@@ -109,7 +111,6 @@ class SubmitDiginoleFileService {
       }
       $coverpage_formatted_author_names[] = $coverpage_formatted_author_name;
     }
-
     if (count($coverpage_formatted_author_names) == 1) {
       $coverpage_formatted_authors_string = implode("", $coverpage_formatted_author_names);
     }
@@ -119,7 +120,6 @@ class SubmitDiginoleFileService {
     else {
       $coverpage_formatted_authors_string = implode(", ", array_slice($coverpage_formatted_author_names, 0, -2)) . ", " . implode(" and ", array_slice($coverpage_formatted_author_names, -2)); 
     }
-
     $coverpage_generated_pdf = new \FPDI();
     $coverpage_generated_pdf->AddPage('P', 'Letter');
     $coverpage_generated_pdf->setSourceFile(__DIR__ . '/../assets/coverpage.pdf');
@@ -142,7 +142,10 @@ class SubmitDiginoleFileService {
     $coverpage_generated_pdf->setFontSize(8);
     $coverpage_generated_pdf->SetY($coverpage_generated_pdf->GetY() + 5);
     $coverpage_generated_pdf->MultiCell(0, 5, $submission_data['publication_note'], 0, 'L');
-    $coverpage_generated_pdf->Output("/tmp/{$iid}.coverpage.pdf", 'F');
-
+    $tmp_submissions_iid_path = "/tmp/ais_submissions/{$iid}";
+    $coverpage_generated_pdf->Output("{$tmp_submissions_iid_path}/coverpage.pdf", 'F');
+    shell_exec("mv {$tmp_submissions_iid_path}/{$iid}.pdf {$tmp_submissions_iid_path}/original.pdf");
+    shell_exec("gs -dBATCH -dNOPAUSE -q -sDEVICE=pdfwrite -dPDFSETTINGS=/prepress -sOutputFile={$tmp_submissions_iid_path}/{$iid}.pdf {$tmp_submissions_iid_path}/coverpage.pdf {$tmp_submissions_iid_path}/original.pdf");
+    shell_exec("rm {$tmp_submissions_iid_path}/coverpage.pdf {$tmp_submissions_iid_path}/original.pdf");
   }
 }

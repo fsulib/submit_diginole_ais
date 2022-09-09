@@ -126,6 +126,7 @@ class ApprovedSubmissionCommands extends DrushCommands {
       $this->messenger->addError(dt('You passed an incorrect parameter value. Accepted values are: "honors_thesis_submission","research_repository_submission","university_records_submission"'));
     }
     else {
+      shell_exec('rm -rf /tmp/ais_submissions');
       if ($options['status']) {
         $status = $options['status'];
       }
@@ -165,8 +166,10 @@ class ApprovedSubmissionCommands extends DrushCommands {
         // move files
         if ($webform == 'honors_thesis_submission') {
           $fid = $submission->getData()['upload_honors_thesis'][0];
-          $this->submitDiginoleFileService->transferSubmissionFile($fid, $destination_folder, $iid);
-          $this->submitDiginoleFileService->applyCoverpageToFile($iid, $submission->getData());
+          $filename = $this->submitDiginoleFileService->transferSubmissionFile($fid, $destination_folder, $iid);
+          if (pathinfo("/tmp/ais_submissions/{$iid}/{$filename}", PATHINFO_EXTENSION) == 'pdf') {
+            $this->submitDiginoleFileService->applyCoverpageToFile($iid, $filename, $submission->getData());
+          }
         }
 
         // add manifest
