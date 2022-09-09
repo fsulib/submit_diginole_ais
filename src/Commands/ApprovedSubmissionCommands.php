@@ -166,6 +166,7 @@ class ApprovedSubmissionCommands extends DrushCommands {
         if ($webform == 'honors_thesis_submission') {
           $fid = $submission->getData()['upload_honors_thesis'][0];
           $this->submitDiginoleFileService->transferSubmissionFile($fid, $destination_folder, $iid);
+          $this->submitDiginoleFileService->applyCoverpageToFile($iid, $submission->getData());
         }
 
         // add manifest

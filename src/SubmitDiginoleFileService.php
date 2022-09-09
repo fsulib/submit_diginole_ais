@@ -83,4 +83,39 @@ class SubmitDiginoleFileService {
     $this->fileSystem->prepareDirectory($destination, FileSystemInterface::CREATE_DIRECTORY);
     $this->fileRepository->writeData($content, $destination . $fileName, FileSystemInterface::EXISTS_REPLACE);
   }
+
+  /**
+   * Applies coverpage to PDF file
+   *
+   * @param string $iid
+   *   IID of submission
+   * @param array $submission_data
+   *   Data from submission entity 
+   */
+  public function applyCoverpageToFile($iid, $submission_data) {
+
+    $coverpage_formatted_title = !empty($submission_data['submission_subtitle']) ? "{$submission_data['submission_title']}: {$submission_data['submission_subtitle']}" : $submission_data['submission_title'];
+    $coverpage_formatted_year = date('Y', strtotime($submission_data['date_of_submission']));
+    $coverpage_formatted_author_names = array();
+    foreach ($submission_data['author'] as $author) {
+	    if (!empty($author['author_middle_name'])) {
+        $coverpage_formatted_author_name = "{$author['author_first_name']} {$author['author_middle_name']} {$author['author_last_name']}";
+      }
+      else {
+        $coverpage_formatted_author_name = "{$author['author_first_name']} {$author['author_last_name']}";
+      }
+      $coverpage_formatted_author_names[] = $coverpage_formatted_author_name;
+    }
+
+    if (count($coverpage_formatted_author_names) == 1) {
+      $coverpage_formatted_authors_string = implode("", $coverpage_formatted_author_names);
+    }
+    elseif (count($coverpage_formatted_author_names) == 2) {
+      $coverpage_formatted_authors_string = implode(" and ", $coverpage_formatted_author_names);
+    }
+    else {
+      $coverpage_formatted_authors_string = implode(", ", array_slice($coverpage_formatted_author_names, 0, -2)) . ", " . implode(" and ", array_slice($coverpage_formatted_author_names, -2)); 
+    }
+
+  }
 }
