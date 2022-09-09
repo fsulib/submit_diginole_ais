@@ -31,7 +31,7 @@ echo "$(date): submit2ais_crontrigger.sh activated."
 cd /tmp/ais_packages/
 for PACKAGE in $(ls *)
 do
-  aws s3 cp $PACKAGE s3://ingest-dev.lib.fsu.edu/diginole/ais/new/$PACKAGE
+  aws s3 cp $PACKAGE s3://ingest-$ENVIRONMENT.lib.fsu.edu/diginole/ais/new/$PACKAGE
 done
 
 echo "$(date): submit2ais_crontrigger.sh complete."
