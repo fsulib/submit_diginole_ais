@@ -13,7 +13,7 @@ $desc=array (
 );
 $up=-63;
 $ut=44;
-$ttffile='/var/www/html/fsulib_scripts/assets/tfpdf/font/unifont/DejaVuSerif.ttf';
+$ttffile='/var/sites/submit_diginole/web/modules/custom/submit_diginole_ais/assets/tfpdf/font/unifont/DejaVuSerif.ttf';
 $originalsize=363200;
 $fontkey='dejavuserif';
 ?>

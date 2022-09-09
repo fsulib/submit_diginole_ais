@@ -7,6 +7,9 @@ use Drupal\Core\File\FileSystemInterface;
 use Drupal\file\FileRepositoryInterface;
 use Drupal\submit_diginole_ais\DiginoleSubmissionService;
 
+require_once(__DIR__ . '/../assets/fpdf.extension.php');
+require_once(__DIR__ . '/../assets/FPDI-1.6.1/fpdi.php');
+
 /**
  * class SubmitDiginoleFileService
  */
@@ -116,6 +119,30 @@ class SubmitDiginoleFileService {
     else {
       $coverpage_formatted_authors_string = implode(", ", array_slice($coverpage_formatted_author_names, 0, -2)) . ", " . implode(" and ", array_slice($coverpage_formatted_author_names, -2)); 
     }
+
+    $coverpage_generated_pdf = new \FPDI();
+    $coverpage_generated_pdf->AddPage('P', 'Letter');
+    $coverpage_generated_pdf->setSourceFile(__DIR__ . '/../assets/coverpage.pdf');
+    $tplIdx = $coverpage_generated_pdf->importPage(1);
+    $coverpage_generated_pdf->useTemplate($tplIdx);
+    $coverpage_generated_pdf->SetTextColor(0, 0, 0);
+    $coverpage_generated_pdf->SetFont('Times');
+    $coverpage_generated_pdf->AddFont('DejaVuSerif', '', 'DejaVuSerif.ttf', true);
+    $coverpage_generated_pdf->SetFont('DejaVuSerif', '');
+    $coverpage_generated_pdf->setFontSize(14);
+    $coverpage_generated_pdf->SetXY(25, 55);
+    $coverpage_generated_pdf->Write(0, $coverpage_formatted_year);
+    $coverpage_generated_pdf->setFontSize(26);
+    $coverpage_generated_pdf->SetXY(25, 60);
+    $coverpage_generated_pdf->MultiCell(0, 10, $coverpage_formatted_title, 0, 'L');
+    $coverpage_generated_pdf->setFontSize(14);
+    $coverpage_generated_pdf->setLeftMargin(25);
+    $coverpage_generated_pdf->SetY($coverpage_generated_pdf->GetY() + 3);
+    $coverpage_generated_pdf->MultiCell(0, 5, $coverpage_formatted_authors_string, 0, 'L');
+    $coverpage_generated_pdf->setFontSize(8);
+    $coverpage_generated_pdf->SetY($coverpage_generated_pdf->GetY() + 5);
+    $coverpage_generated_pdf->MultiCell(0, 5, $submission_data['publication_note'], 0, 'L');
+    $coverpage_generated_pdf->Output("/tmp/{$iid}.coverpage.pdf", 'F');
 
   }
 }
