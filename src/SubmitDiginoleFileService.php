@@ -7,7 +7,7 @@ use Drupal\Core\File\FileSystemInterface;
 use Drupal\file\FileRepositoryInterface;
 use Drupal\submit_diginole_ais\DiginoleSubmissionService;
 
-require_once(__DIR__ . '/../assets/fpdf.extension.php');
+require_once(__DIR__ . '/../assets/fpdf.class.php');
 require_once(__DIR__ . '/../assets/FPDI-1.6.1/fpdi.php');
 
 /**
