@@ -126,7 +126,7 @@ class ApprovedSubmissionCommands extends DrushCommands {
       $this->messenger->addError(dt('You passed an incorrect parameter value. Accepted values are: "honors_thesis_submission","research_repository_submission","university_records_submission"'));
     }
     else {
-      shell_exec('rm -rf /tmp/ais_submissions');
+      shell_exec('rm -rf /tmp/ais_packages');
       if ($options['status']) {
         $status = $options['status'];
       }
@@ -139,8 +139,9 @@ class ApprovedSubmissionCommands extends DrushCommands {
       }
       foreach ($sids as $sid) {
         $submission = $this->entityTypeManager->getStorage('webform_submission')->load($sid);
-
         $iid = $this->diginoleSubmissionService->getIID($submission);
+
+        $this->messenger->addMessage('Processing ' . $iid);
 
         $template = $this->diginoleSubmissionService->getSubmissionTemplate($submission);
         $template_data = $this->diginoleSubmissionService->getTemplateData($submission);
@@ -167,8 +168,10 @@ class ApprovedSubmissionCommands extends DrushCommands {
         if ($webform == 'honors_thesis_submission') {
           $fid = $submission->getData()['upload_honors_thesis'][0];
           $filename = $this->submitDiginoleFileService->transferSubmissionFile($fid, $destination_folder, $iid);
+          $this->messenger->addMessage('Saved file ' . $filename);
           if (pathinfo("/tmp/ais_submissions/{$iid}/{$filename}", PATHINFO_EXTENSION) == 'pdf') {
             $this->submitDiginoleFileService->applyCoverpageToFile($iid, $filename, $submission->getData());
+            $this->messenger->addMessage('Coverpaging ' . $filename);
           }
         }
 
@@ -181,17 +184,23 @@ class ApprovedSubmissionCommands extends DrushCommands {
         $manifest_file_result = $this->submitDiginoleFileService->writeContentToFile($rendered_manifest, $destination_folder, $manifest_filename);
 
         if (empty($manifest_file_result)) {
-          $message = 'Saved file ' . $iid . '/' . $manifest_filename;
+          $message = 'Saved file ' . $manifest_filename;
           $this->loggerChannelFactory->get('ais_submissions')->info(dt($message));
           $this->messenger->addMessage($message);
         }
         else {
-          $message = 'Unable to save file ' . $iid . '/' . $manifest_filename;
+          $message = 'Unable to save file ' . $manifest_filename;
           $this->loggerChannelFactory->get('ais_submissions')->error(dt($message));
           $this->messenger->addError($message);
         }
+        
+        // Create final AIS packages       
+        $this->messenger->addMessage('Packaging ' . $iid);
+        shell_exec('mkdir /tmp/ais_packages');
+        shell_exec("cd /tmp/ais_submissions/{$iid}; zip /tmp/ais_packages/{$iid}.zip *");
+        shell_exec('rm -rf /tmp/ais_submissions');
+        $this->messenger->addMessage($iid . '.zip complete');
       }
-
     }
   }
 
