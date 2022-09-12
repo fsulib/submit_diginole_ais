@@ -22,16 +22,23 @@ then
   exit 1
 fi
 
+echo "$(date): submit2ais_crontrigger.sh activated."
+
 source /etc/environment
 
-echo "$(date): submit2ais_crontrigger.sh activated."
+if [[ "$ENVIRONMENT" == "dev" ]] && [[ "$VAGRANT" == "TRUE" ]]
+then
+  BUCKET_ENV='vagrant'
+else
+  BUCKET_ENV=$ENVIRONMENT
+fi
 
 /var/sites/submit_diginole/vendor/bin/drush ais_process $1
 
 cd /tmp/ais_packages/
 for PACKAGE in $(ls *)
 do
-  aws s3 cp $PACKAGE s3://ingest-$ENVIRONMENT.lib.fsu.edu/diginole/ais/new/$PACKAGE
+  aws s3 cp $PACKAGE s3://ingest-$BUCKET_ENV.lib.fsu.edu/diginole/ais/new/$PACKAGE
 done
 
 echo "$(date): submit2ais_crontrigger.sh complete."
