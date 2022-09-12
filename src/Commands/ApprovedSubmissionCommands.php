@@ -141,65 +141,96 @@ class ApprovedSubmissionCommands extends DrushCommands {
         $submission = $this->entityTypeManager->getStorage('webform_submission')->load($sid);
         $iid = $this->diginoleSubmissionService->getIID($submission);
 
-        $this->messenger->addMessage('Processing ' . $iid);
+        $this->messenger->addMessage("Processing {$iid}");
 
-        $template = $this->diginoleSubmissionService->getSubmissionTemplate($submission);
-        $template_data = $this->diginoleSubmissionService->getTemplateData($submission);
+        $env = getenv('ENVIRONMENT');
+	switch ($env) {
+          case 'prod':
+	    $url = "https://diginole.lib.fsu.edu/diginole/webservices/ais/package/status/{$iid}.zip";
+            $this->messenger->addMessage("Checking AIS-prod status of {$iid}.zip...");
+            break;
+          case 'test':
+	    $url = "https://test.diginole.lib.fsu.edu/diginole/webservices/ais/package/status/{$iid}.zip";
+            $this->messenger->addMessage("Checking AIS-test status of {$iid}.zip...");
+            break;
+          default:
+	    $url = FALSE;
+            $this->messenger->addMessage("No corresponding AIS environment for {$env}, skipping check.");
+            break;
+        }
 
-        // $template_data contains each submission
-        $rendered_output = $this->twigService->render(self::TEMPLATE_PATH . $template, ['item' => $template_data]);
+	if (!$url) {
+          $ais_package_status = 'false';
+        }
+	else {
+          $ais_package_status = file_get_contents($url);
+        }
 
-        $destination_folder = self::BASE_PATH . $iid . '/';
-        $mods_filename = $iid . '.xml';
-        $mods_file_result = $this->submitDiginoleFileService->writeContentToFile($rendered_output, $destination_folder, $mods_filename);
-
-        if (empty($mods_file_result)) {
-          $message = 'Saved file ' . $mods_filename;
-          $this->loggerChannelFactory->get('ais_submissions')->info(dt($message));
-          $this->messenger->addMessage($message);
+        if ($ais_package_status != 'false') {
+          $this->messenger->addMessage("{$iid}.zip has already been processed by AIS, check AIS logs for result. Skipping processing of {$iid}.");
+          # TODO: Add something that updates submission entity with outcome of AIS processing
         }
         else {
-          $message = 'Unable to save file ' . $mods_filename;
-          $this->loggerChannelFactory->get('ais_submissions')->error(dt($message));
-          $this->messenger->addError($message);
-        }
+          $this->messenger->addMessage("{$iid}.zip not detected in AIS-{$env}, creating package now.");
 
-        // move files
-        if ($webform == 'honors_thesis_submission') {
-          $fid = $submission->getData()['upload_honors_thesis'][0];
-          $filename = $this->submitDiginoleFileService->transferSubmissionFile($fid, $destination_folder, $iid);
-          $this->messenger->addMessage('Saved file ' . $filename);
-          if (pathinfo("/tmp/ais_submissions/{$iid}/{$filename}", PATHINFO_EXTENSION) == 'pdf') {
-            $this->submitDiginoleFileService->applyCoverpageToFile($iid, $filename, $submission->getData());
-            $this->messenger->addMessage('Coverpaging ' . $filename);
+          $template = $this->diginoleSubmissionService->getSubmissionTemplate($submission);
+          $template_data = $this->diginoleSubmissionService->getTemplateData($submission);
+
+          // $template_data contains each submission
+          $rendered_output = $this->twigService->render(self::TEMPLATE_PATH . $template, ['item' => $template_data]);
+
+          $destination_folder = self::BASE_PATH . $iid . '/';
+          $mods_filename = $iid . '.xml';
+          $mods_file_result = $this->submitDiginoleFileService->writeContentToFile($rendered_output, $destination_folder, $mods_filename);
+
+          if (empty($mods_file_result)) {
+            $message = 'Saved file ' . $mods_filename;
+            $this->loggerChannelFactory->get('ais_submissions')->info(dt($message));
+            $this->messenger->addMessage($message);
           }
-        }
+          else {
+            $message = 'Unable to save file ' . $mods_filename;
+            $this->loggerChannelFactory->get('ais_submissions')->error(dt($message));
+            $this->messenger->addError($message);
+          }
 
-        // add manifest
-        $manifest_template = $this->submitDiginoleManifestService->getManifestTemplate();
-        $manifest_data = $this->submitDiginoleManifestService->getManifestContents($submission);
-        $manifest_filename = $this->submitDiginoleManifestService->getManifestFilename();
+          // move files
+          if ($webform == 'honors_thesis_submission') {
+            $fid = $submission->getData()['upload_honors_thesis'][0];
+            $filename = $this->submitDiginoleFileService->transferSubmissionFile($fid, $destination_folder, $iid);
+            $this->messenger->addMessage('Saved file ' . $filename);
+            if (pathinfo("/tmp/ais_submissions/{$iid}/{$filename}", PATHINFO_EXTENSION) == 'pdf') {
+              $this->submitDiginoleFileService->applyCoverpageToFile($iid, $filename, $submission->getData());
+              $this->messenger->addMessage('Coverpaging ' . $filename);
+            }
+          }
 
-        $rendered_manifest = $this->twigService->render(self::TEMPLATE_PATH . $manifest_template, ['manifest' => $manifest_data]);
-        $manifest_file_result = $this->submitDiginoleFileService->writeContentToFile($rendered_manifest, $destination_folder, $manifest_filename);
+          // add manifest
+          $manifest_template = $this->submitDiginoleManifestService->getManifestTemplate();
+          $manifest_data = $this->submitDiginoleManifestService->getManifestContents($submission);
+          $manifest_filename = $this->submitDiginoleManifestService->getManifestFilename();
 
-        if (empty($manifest_file_result)) {
-          $message = 'Saved file ' . $manifest_filename;
-          $this->loggerChannelFactory->get('ais_submissions')->info(dt($message));
-          $this->messenger->addMessage($message);
+          $rendered_manifest = $this->twigService->render(self::TEMPLATE_PATH . $manifest_template, ['manifest' => $manifest_data]);
+          $manifest_file_result = $this->submitDiginoleFileService->writeContentToFile($rendered_manifest, $destination_folder, $manifest_filename);
+
+          if (empty($manifest_file_result)) {
+            $message = 'Saved file ' . $manifest_filename;
+            $this->loggerChannelFactory->get('ais_submissions')->info(dt($message));
+            $this->messenger->addMessage($message);
+          }
+          else {
+            $message = 'Unable to save file ' . $manifest_filename;
+            $this->loggerChannelFactory->get('ais_submissions')->error(dt($message));
+            $this->messenger->addError($message);
+          }
+          
+          // Create final AIS packages       
+          $this->messenger->addMessage('Packaging ' . $iid);
+          shell_exec('mkdir /tmp/ais_packages');
+          shell_exec("cd /tmp/ais_submissions/{$iid}; zip /tmp/ais_packages/{$iid}.zip *");
+          shell_exec('rm -rf /tmp/ais_submissions');
+          $this->messenger->addMessage("Creation of {$iid}.zip AIS package complete.");
         }
-        else {
-          $message = 'Unable to save file ' . $manifest_filename;
-          $this->loggerChannelFactory->get('ais_submissions')->error(dt($message));
-          $this->messenger->addError($message);
-        }
-        
-        // Create final AIS packages       
-        $this->messenger->addMessage('Packaging ' . $iid);
-        shell_exec('mkdir /tmp/ais_packages');
-        shell_exec("cd /tmp/ais_submissions/{$iid}; zip /tmp/ais_packages/{$iid}.zip *");
-        shell_exec('rm -rf /tmp/ais_submissions');
-        $this->messenger->addMessage($iid . '.zip complete');
       }
     }
   }
