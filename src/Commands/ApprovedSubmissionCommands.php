@@ -127,6 +127,7 @@ class ApprovedSubmissionCommands extends DrushCommands {
     }
     else {
       shell_exec('rm -rf /tmp/ais_packages');
+      shell_exec('mkdir /tmp/ais_packages');
       if ($options['status']) {
         $status = $options['status'];
       }
@@ -226,7 +227,6 @@ class ApprovedSubmissionCommands extends DrushCommands {
           
           // Create final AIS packages       
           $this->messenger->addMessage('Packaging ' . $iid);
-          shell_exec('mkdir /tmp/ais_packages');
           shell_exec("cd /tmp/ais_submissions/{$iid}; zip /tmp/ais_packages/{$iid}.zip *");
           shell_exec('rm -rf /tmp/ais_submissions');
           $this->messenger->addMessage("Creation of {$iid}.zip AIS package complete.");

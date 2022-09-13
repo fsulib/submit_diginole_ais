@@ -45,7 +45,7 @@ class SubmitDiginoleManifestService {
     }
 
     // scholar embargo
-    if (!empty($submission_data['embargo_period'])) {
+    if ((!empty($submission_data['embargo_period'])) && ($submission_data['embargo_period'] != 'none')) {
       if ($submission_data['embargo_period'] != 'unsure') {
         $selected_period = $submission_data['embargo_period'];
         $period_array = explode('_', $selected_period);
