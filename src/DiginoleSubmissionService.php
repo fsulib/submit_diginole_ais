@@ -52,6 +52,18 @@ class DiginoleSubmissionService {
     return $template;
   }
 
+  public function getSubmissionFID(WebformSubmission $submission) {
+    $fid = null;
+    $webform = $submission->get('webform_id')->target_id;
+    if ($webform == 'honors_thesis_submission') {
+      $fid = $submission->getData()['upload_honors_thesis'][0];
+    }
+    elseif ($webform == 'research_repository_submission') {
+      $fid = $submission->getData()['upload_element	'][0];
+    }
+    return $fid;
+  }
+
   public function getMimeTypeFromFID($fid) {
     $file = File::load($fid);
     $filename = $file->getFileUri();
