@@ -26,11 +26,11 @@ echo "$(date): submit2ais_crontrigger.sh activated."
 
 source /etc/environment
 
-if [[ "$ENVIRONMENT" == "dev" ]] && [[ "$VAGRANT" == "TRUE" ]]
+if [[ "$ENVIRONMENT" == "prod" ]]
 then
-  BUCKET_ENV='vagrant'
+  BUCKET_ENV='prod'
 else
-  BUCKET_ENV=$ENVIRONMENT
+  BUCKET_ENV='test'
 fi
 
 /var/sites/submit_diginole/vendor/bin/drush ais_process $1

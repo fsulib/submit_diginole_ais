@@ -147,16 +147,14 @@ class ApprovedSubmissionCommands extends DrushCommands {
         $env = getenv('ENVIRONMENT');
 	switch ($env) {
           case 'prod':
+	    $ais_env = 'prod';
 	    $url = "https://diginole.lib.fsu.edu/diginole/webservices/ais/package/status/{$iid}.zip";
             $this->messenger->addMessage("Checking AIS-prod status of {$iid}.zip...");
             break;
-          case 'test':
+          default:
+	    $ais_env = 'test';
 	    $url = "https://test.diginole.lib.fsu.edu/diginole/webservices/ais/package/status/{$iid}.zip";
             $this->messenger->addMessage("Checking AIS-test status of {$iid}.zip...");
-            break;
-          default:
-	    $url = FALSE;
-            $this->messenger->addMessage("No corresponding AIS environment for {$env}, skipping check.");
             break;
         }
 
@@ -168,11 +166,18 @@ class ApprovedSubmissionCommands extends DrushCommands {
         }
 
         if ($ais_package_status != 'false') {
-          $this->messenger->addMessage("{$iid}.zip has already been processed by AIS, check AIS logs for result. Skipping processing of {$iid}.");
-          # TODO: Add something that updates submission entity with outcome of AIS processing
+	  $response = json_decode($ais_package_status, TRUE);
+	  // Add code to update submission based on AIS response
+	  if ($response['status'] == 'Success') {
+            $this->messenger->addMessage("{$iid}.zip has already been processed by AIS-{$ais_env} to create {$response['message']}. Skipping processing of {$iid}.");
+          }
+	  else {
+            $this->messenger->addMessage("{$iid}.zip has already been processed by AIS-{$ais_env} but was unsuccessful; see the DigiNole AIS log for more details.");
+	  }
+          $this->messenger->addMessage("Skipping processing of {$iid}.");
         }
         else {
-          $this->messenger->addMessage("{$iid}.zip not detected in AIS-{$env}, creating package now.");
+          $this->messenger->addMessage("{$iid}.zip not detected in AIS-{$ais_env}, creating package now.");
 
           $template = $this->diginoleSubmissionService->getSubmissionTemplate($submission);
           $template_data = $this->diginoleSubmissionService->getTemplateData($submission);
