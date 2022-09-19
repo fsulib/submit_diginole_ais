@@ -2,9 +2,11 @@
 <mods:mods xmlns="http://www.loc.gov/mods/v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:flvc="info:flvc/manifest/v1" xmlns:mods="http://www.loc.gov/mods/v3" xmlns:dcterms="http://purl.org/dc/terms/" xsi:schemaLocation="http://www.loc.gov/standards/mods/v3/mods-3-4.xsd" version="3.4">
   <titleInfo lang="eng">
     <title>{{ item.titleInfo_title|escape('html') }}</title>
+    {%~ if item.titleInfo_subTitle|length > 0 -%}
     <subTitle>{{ item.titleInfo_subTitle|escape('html') }}</subTitle>
+    {%~ endif %}
   </titleInfo>
-  {% for author in item.author %}
+  {%~ for author in item.author %}
   <name type="personal" authority="local">
     <namePart type="given">{{ author.name_namePart_given }}</namePart>
     <namePart type="family">{{ author.name_namePart_family }}</namePart>
@@ -19,7 +21,7 @@
       <roleTerm authority="marcrelator" type="code">aut</roleTerm>
     </role>
   </name>
-  {% endfor %}
+  {%~ endfor %}
   {%~ if item.originInfo_dateIssued|length > 0 -%}
   <originInfo>
     <dateIssued encoding="w3cdtf" keyDate="yes">{{ item.originInfo_dateIssued }}</dateIssued>
@@ -46,12 +48,9 @@
   {%~ if item.accessCondition_text|length > 0 %}
   <accessCondition type="use and reproduction" xlink:href="{{ item.accessCondition_xlink }}">{{ item.accessCondition_text|escape('html') }}</accessCondition>
   {%~ endif %}
-  <extension>
-    <flvc:flvc>
-      <flvc:owningInstitution>FSU</flvc:owningInstitution>
-      <flvc:submittingInstitution>FSU</flvc:submittingInstitution>
-    </flvc:flvc>
-  </extension>
+  <typeOfResource>text</typeOfResource>
+  <genre authority="rdacontent">text</genre>
+  <genre authority="coar" authorityURI="http://purl.org/coar/resource_type" valueURI="http://purl.org/coar/resource_type/">bachelor thesis</genre>
   <language>
     <languageTerm type="text">English</languageTerm>
     <languageTerm type="code" authority="iso639-2b">eng</languageTerm>
