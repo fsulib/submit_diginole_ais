@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mods:mods xmlns="http://www.loc.gov/mods/v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:flvc="info:flvc/manifest/v1" xmlns:mods="http://www.loc.gov/mods/v3" xmlns:dcterms="http://purl.org/dc/terms/" xsi:schemaLocation="http://www.loc.gov/standards/mods/v3/mods-3-4.xsd" version="3.4">
+  <titleInfo lang="eng">
+    <title>{{ item.titleInfo_title|escape('html') }}</title>
+    <subTitle>{{ item.titleInfo_subTitle|escape('html') }}</subTitle>
+  </titleInfo>
+  {% for author in item.author %}
+  <name type="personal" authority="local">
+    <namePart type="given">{{ author.name_namePart_given }}</namePart>
+    <namePart type="family">{{ author.name_namePart_family }}</namePart>
+    {%~ if author.name_affiliation|length > 0 %}
+    <affiliation>{{ author.name_affiliation|escape('html') }}</affiliation>
+    {%~ endif %}
+    {%~ if author.name_nameIdentifier_orcid|length > 0 %}
+    <nameIdentifier type="orcid">{{ author.name_nameIdentifier_orcid|escape('html') }}</nameIdentifier>
+    {%~ endif %}
+    <role>
+      <roleTerm authority="rda" type="text">author</roleTerm>
+      <roleTerm authority="marcrelator" type="code">aut</roleTerm>
+    </role>
+  </name>
+  {% endfor %}
+  {%~ if item.originInfo_dateIssued|length > 0 -%}
+  <originInfo>
+    <dateIssued encoding="w3cdtf" keyDate="yes">{{ item.originInfo_dateIssued }}</dateIssued>
+  </originInfo>
+  {%~ endif %}
+  {%~ if item.abstract|length > 0 %}
+  <abstract>{{ item.abstract|escape('html') }}</abstract>
+  {%~ endif %}
+  {%~ if item.identifier_iid|length > 0 %}
+  <identifier type="IID">{{ item.identifier_iid }}</identifier>
+  {%~ endif %}
+  {%~ if item.note_keywords|length > 0 %}
+  <note displayLabel="Keywords">{{ item.note_keywords }}</note>
+  {%~ endif %}
+  {%~ if item.note_publicationNote|length > 0 %}
+  <note displayLabel="Publication Note">{{ item.note_publicationNote }}</note>
+  {%~ endif %}
+  {%~ if item.note_grantNumber|length > 0 %}
+  <note displayLabel="Grant Number">{{ item.note_grantNumber }}</note>
+  {%~ endif %}
+  {%~ if item.indentifier_doi|length > 0 %}
+  <identifier type="DOI">{{ item.indentifier_doi }}</identifier>
+  {%~ endif %}
+  {%~ if item.isbn|length > 0 %}
+  <identifier type="isbn">{{ item.isbn }}</identifier>
+  {%~ endif %}
+  {%~ if item.accessCondition_text|length > 0 %}
+  <accessCondition type="use and reproduction" xlink:href="{{ item.accessCondition_xlink }}">{{ item.accessCondition_text|escape('html') }}</accessCondition>
+  {%~ endif %}
+  {%~ if item.publication_title|length > 0 %}
+  <relatedItem type="host">
+    <titleInfo lang="eng">
+      <title>{{ item.publication_title|escape('html') }}</title>
+    </titleInfo>
+    {%~ if item.publication_volume|length > 0 or item.publication_issue|length > 0 or item.publication_page_range_start|length > 0 %}
+    <part>
+      {%~ if item.publication_volume|length > 0 %}
+        <detail type="volume">
+          <number>{{ item.publication_volume|escape('html') }}</number>
+          <caption>vol.</caption>
+        </detail>
+      {%~ endif %}
+      {%~ if item.publication_issue|length > 0 %}
+        <detail type="issue">
+          <number>{{ item.publication_issue|escape('html') }}</number>
+          <caption>iss.</caption>
+        </detail>
+      {%~ endif %}
+      {%~ if item.publication_page_range_start|length > 0 %}
+        <extent unit="page">
+          <start>{{ item.publication_page_range_start|escape('html') }}</start>
+          {%~ if item.publication_page_range_end|length > 0 %}
+          <end>{{ item.publication_page_range_end|escape('html') }}</end>
+          {%~ endif %}
+        </extent>
+      {%~ endif %}
+    </part>
+    {%~ endif %}
+  </relatedItem>
+  {%~ endif %}
+
+  <extension>
+    <flvc:flvc>
+      <flvc:owningInstitution>FSU</flvc:owningInstitution>
+      <flvc:submittingInstitution>FSU</flvc:submittingInstitution>
+    </flvc:flvc>
+  </extension>
+  <language>
+    <languageTerm type="text">English</languageTerm>
+    <languageTerm type="code" authority="iso639-2b">eng</languageTerm>
+  </language>
+  <physicalDescription>
+    <form authority="rdamedia" type="RDA media terms">computer</form>
+    <form authority="rdacarrier" type="RDA carrier terms">online resource</form>
+    <extent>1 online resource</extent>
+    <digitalOrigin>born digital</digitalOrigin>
+    <internetMediaType>{{ item.internetMediaType }}</internetMediaType>
+  </physicalDescription>
+  <recordInfo>
+    <recordCreationDate encoding="w3cdtf">{{ "now"|date("Y-m-d") }}</recordCreationDate>
+    <descriptionStandard>rda</descriptionStandard>
+  </recordInfo>
+  {%~ if item.location_purl|length > 0 %}
+  <location displayLabel="purl">
+    <url>{{ item.location_purl }}</url>
+  </location>
+  {%~ endif %}
+</mods:mods>
+
