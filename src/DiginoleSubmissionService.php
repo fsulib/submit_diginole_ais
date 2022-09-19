@@ -52,6 +52,18 @@ class DiginoleSubmissionService {
     return $template;
   }
 
+  public function getSubmissionFID(WebformSubmission $submission) {
+    $fid = null;
+    $webform = $submission->get('webform_id')->target_id;
+    if ($webform == 'honors_thesis_submission') {
+      $fid = $submission->getData()['upload_honors_thesis'][0];
+    }
+    elseif ($webform == 'research_repository_submission') {
+      $fid = $submission->getData()['upload_element'][0];
+    }
+    return $fid;
+  }
+
   public function getMimeTypeFromFID($fid) {
     $file = File::load($fid);
     $filename = $file->getFileUri();
@@ -93,7 +105,50 @@ class DiginoleSubmissionService {
     $template_data = $this->getCommonData($submission);
     $submission_data = $submission->getData();
 
-    $template_data['indentifier_doi'] = $submission_data['doi'];
+    $fid = $submission_data['upload_element'][0];
+    $template_data['internetMediaType'] = $this->getMimeTypeFromFID($fid);
+
+    $template_data['indentifier_doi'] = array_key_exists('doi', $submission_data) ? $submission_data['doi'] : $submission_data['if_there_is_already_a_doi_associated_with_this_item_please_enter'];
+    if (array_key_exists('date_of_publication', $submission_data)) {
+      $template_data['originInfo_dateIssued'] = $submission_data['date_of_publication'];
+    }
+    if (array_key_exists('journal_of_publication', $submission_data)) {
+      $template_data['publication_title'] = $submission_data['journal_of_publication'];
+    }
+    if (array_key_exists('publication_title', $submission_data)) {
+      $template_data['publication_title'] = $submission_data['publication_title'];
+    }
+    if (array_key_exists('publisher_name', $submission_data)) {
+      $template_data['publisher_name'] = $submission_data['publisher_name'];
+    }
+    if (array_key_exists('publication_edition', $submission_data)) {
+      $template_data['publication_edition'] = $submission_data['publication_edition'];
+    }
+    if (array_key_exists('publication_volume', $submission_data)) {
+      $template_data['publication_volume'] = $submission_data['publication_volume'];
+    }
+    if (array_key_exists('publication_issue', $submission_data)) {
+      $template_data['publication_issue'] = $submission_data['publication_issue'];
+    }
+    if (array_key_exists('publication_page_range', $submission_data)) {
+      if (strpos($submission_data['publication_page_range'], '-')) {
+        $range_array = explode('-', $submission_data['publication_page_range']);
+        $template_data['publication_page_range_start'] = $range_array[0];
+        $template_data['publication_page_range_end'] = $range_array[1];
+      }
+      else {
+        $template_data['publication_page_range_start'] = $submission_data['publication_page_range'];
+      }
+    }
+    if (array_key_exists('isbn', $submission_data)) {
+      $template_data['isbn'] = $submission_data['isbn'];
+    }
+    if (array_key_exists('preferred_citation', $submission_data)) {
+      $template_data['preferred_citation'] = $submission_data['preferred_citation'];
+    }
+    /*if (array_key_exists('SOME_KEY', $submission_data)) {
+      $template_data['SOME_KEY'] = $submission_data['SOME_KEY'];
+    }*/
 
     return $template_data;
   }

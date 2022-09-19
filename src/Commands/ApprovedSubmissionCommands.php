@@ -201,14 +201,19 @@ class ApprovedSubmissionCommands extends DrushCommands {
           }
 
           // move files
-          if ($webform == 'honors_thesis_submission') {
-            $fid = $submission->getData()['upload_honors_thesis'][0];
+          $fid = $this->diginoleSubmissionService->getSubmissionFID($submission);
+          if (!empty($fid)) {
             $filename = $this->submitDiginoleFileService->transferSubmissionFile($fid, $destination_folder, $iid);
             $this->messenger->addMessage('Saved file ' . $filename);
             if (pathinfo("/tmp/ais_submissions/{$iid}/{$filename}", PATHINFO_EXTENSION) == 'pdf') {
               $this->submitDiginoleFileService->applyCoverpageToFile($iid, $filename, $submission->getData());
               $this->messenger->addMessage('Coverpaging ' . $filename);
             }
+          }
+          else {
+            $message = 'Unable to move uploaded file for ' . $iid;
+            $this->loggerChannelFactory->get('ais_submissions')->error(dt($message));
+            $this->messenger->addError($message);
           }
 
           // add manifest
@@ -229,8 +234,8 @@ class ApprovedSubmissionCommands extends DrushCommands {
             $this->loggerChannelFactory->get('ais_submissions')->error(dt($message));
             $this->messenger->addError($message);
           }
-          
-          // Create final AIS packages       
+
+          // Create final AIS packages
           $this->messenger->addMessage('Packaging ' . $iid);
           shell_exec("cd /tmp/ais_submissions/{$iid}; zip /tmp/ais_packages/{$iid}.zip *");
           shell_exec('rm -rf /tmp/ais_submissions');
