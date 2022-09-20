@@ -49,6 +49,24 @@
   {%~ if item.accessCondition_text|length > 0 %}
   <accessCondition type="use and reproduction" xlink:href="{{ item.accessCondition_xlink }}">{{ item.accessCondition_text|escape('html') }}</accessCondition>
   {%~ endif %}
+  {%~ if item.units_of_scale|length > 0 %}
+  <note displayLabel="Units of Scale">{{ item.units_of_scale }}</note>
+  {%~ endif %}
+  {%~ if item.method_of_creation|length > 0 %}
+  <note displayLabel="Method of Creation">{{ item.method_of_creation }}</note>
+  {%~ endif %}
+  {%~ if item.three_d_model_base_unit|length > 0 %}
+  <note displayLabel="3D Model Base Unit">{{ item.three_d_model_base_unit }}</note>
+  {%~ endif %}
+  {%~ if item.extent|length > 0 %}
+  <note displayLabel="Extent">{{ item.extent }}</note>
+  {%~ endif %}
+  {%~ if item.animated|length > 0 %}
+  <note displayLabel="Animated">{{ item.animated }}</note>
+  {%~ endif %}
+  {%~ if item.rigged_geometries|length > 0 %}
+  <note displayLabel="Rigged Geometries">{{ item.rigged_geometries }}</note>
+  {%~ endif %}
   {%~ if item.publication_title|length > 0 %}
   <relatedItem type="host">
     <titleInfo lang="eng">

@@ -72,6 +72,28 @@ class DiginoleSubmissionService {
     return $mime_type;
   }
 
+  public function is3dObjectSubmission(WebformSubmission $submission) {
+    $result = $submission->getElementData('form_type') == '3d_object' ? true : false;
+
+    return $result;
+  }
+
+  public function get3dAdditionalUploads(WebformSubmission $submission) {
+    $additional = [];
+    $submission_data = $submission->getData();
+    if (array_key_exists('material_s_upload')) {
+      if (!empty($submission_data['material_s_upload'])) {
+        $additional[] = $submission_data['material_s_upload'][0];
+      }
+    }
+    if (array_key_exists('texture_upload')) {
+      if (!empty($submission_data['texture_upload'])) {
+        $additional[] = $submission_data['texture_upload'][0];
+      }
+    }
+    return $additional;
+  }
+
   public function getTemplateData(WebformSubmission $submission) {
     $submission_type = $submission->get('webform_id')->target_id;
     switch ($submission_type) {
@@ -140,11 +162,29 @@ class DiginoleSubmissionService {
         $template_data['publication_page_range_start'] = $submission_data['publication_page_range'];
       }
     }
+    if (array_key_exists('units_of_scale', $submission_data)) {
+      $template_data['units_of_scale'] = $submission_data['units_of_scale'];
+    }
     if (array_key_exists('isbn', $submission_data)) {
       $template_data['isbn'] = $submission_data['isbn'];
     }
     if (array_key_exists('preferred_citation', $submission_data)) {
       $template_data['preferred_citation'] = $submission_data['preferred_citation'];
+    }
+    if (array_key_exists('method_of_creation', $submission_data)) {
+      $template_data['method_of_creation'] = $submission_data['method_of_creation'];
+    }
+    if (array_key_exists('3d_model_base_unit', $submission_data)) {
+      $template_data['three_d_model_base_unit'] = $submission_data['3d_model_base_unit'];
+    }
+    if (array_key_exists('extent', $submission_data)) {
+      $template_data['extent'] = $submission_data['extent'];
+    }
+    if (array_key_exists('animated', $submission_data)) {
+      $template_data['animated'] = $submission_data['animated'];
+    }
+    if (array_key_exists('rigged_geometries', $submission_data)) {
+      $template_data['rigged_geometries'] = $submission_data['rigged_geometries'];
     }
     /*if (array_key_exists('SOME_KEY', $submission_data)) {
       $template_data['SOME_KEY'] = $submission_data['SOME_KEY'];
