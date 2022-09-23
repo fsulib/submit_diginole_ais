@@ -43,7 +43,6 @@ namespace Drupal\submit_diginole_ais\Utility;
         "video" => "islandora:sp_videoCModel",
         "working_paper" => "ir:citationCModel",
       ];
-      echo $submission_type . "\n";
 
       return $cModelCrosswalk[$submission_type];
     }
