@@ -65,11 +65,15 @@ class DiginoleSubmissionService {
   }
 
   public function getMimeTypeFromFID($fid) {
-    $file = File::load($fid);
-    $filename = $file->getFileUri();
-    $mime_type = mime_content_type($filename);
-
-    return $mime_type;
+    if ($fid) {
+      $file = File::load($fid);
+      $filename = $file->getFileUri();
+      $mime_type = mime_content_type($filename);
+      return $mime_type;
+    }
+    else {
+      return FALSE;
+    }
   }
 
   public function is3dObjectSubmission(WebformSubmission $submission) {
@@ -116,10 +120,8 @@ class DiginoleSubmissionService {
     $template_data = $this->getCommonData($submission);
     $submission_data = $submission->getData();
     $fid = $submission_data['upload_honors_thesis'][0];
-
     $template_data['indentifier_doi'] = $submission_data['if_there_is_already_a_doi_associated_with_this_item_please_enter'];
     $template_data['internetMediaType'] = $this->getMimeTypeFromFID($fid);
-
     return $template_data;
   }
 

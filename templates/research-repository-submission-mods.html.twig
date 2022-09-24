@@ -112,7 +112,9 @@
     <form authority="rdacarrier" type="RDA carrier terms">online resource</form>
     <extent>1 online resource</extent>
     <digitalOrigin>born digital</digitalOrigin>
+    {%~ if item.internetMediaType|length > 0 %}
     <internetMediaType>{{ item.internetMediaType }}</internetMediaType>
+    {%~ endif %}
   </physicalDescription>
   <recordInfo>
     <recordCreationDate encoding="w3cdtf">{{ "now"|date("Y-m-d") }}</recordCreationDate>

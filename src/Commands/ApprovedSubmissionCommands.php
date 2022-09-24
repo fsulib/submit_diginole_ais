@@ -196,7 +196,6 @@ class ApprovedSubmissionCommands extends DrushCommands {
           }
           else {
             $message = 'Unable to save file ' . $mods_filename;
-            $this->loggerChannelFactory->get('ais_submissions')->error(dt($message));
             $this->messenger->addError($message);
           }
 
@@ -211,8 +210,7 @@ class ApprovedSubmissionCommands extends DrushCommands {
             }
           }
           else {
-            $message = 'Unable to move uploaded file for ' . $iid;
-            $this->loggerChannelFactory->get('ais_submissions')->error(dt($message));
+            $message = 'Could not find attached file for ' . $iid;
             $this->messenger->addError($message);
           }
 
