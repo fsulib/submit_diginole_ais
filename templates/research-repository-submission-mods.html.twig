@@ -100,6 +100,9 @@
     {%~ endif %}
   </relatedItem>
   {%~ endif %}
+  <typeOfResource>{{ item.mods_resource }}</typeOfResource>
+  <genre authority="rdacontent">{{ item.rda_resource }}</genre>
+  <genre authority="coar" authorityURI="http://purl.org/coar/resource_type" valueURI="http://purl.org/coar/resource_type/{{ item.coar_resource_id }}">{{ item.coar_resource_label }}</genre>
   <language>
     <languageTerm type="text">English</languageTerm>
     <languageTerm type="code" authority="iso639-2b">eng</languageTerm>
