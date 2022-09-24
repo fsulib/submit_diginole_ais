@@ -164,17 +164,20 @@ class ApprovedSubmissionCommands extends DrushCommands {
           $ais_package_status = file_get_contents($url);
         }
 
+	$timestamp = date('Y-m-d', time());
         if ($ais_package_status != 'false') {
 	  $response = json_decode($ais_package_status, TRUE);
 	  if ($response['status'] == 'Success') {
-            $this->messenger->addMessage("{$iid}.zip has already been processed by AIS-{$ais_env} to create {$response['message']}. Skipping processing of {$iid}.");
+	    $submission_log_message = "Submission {$iid} has been ingested by AIS-{$ais_env} to create {$response['message']}."; 
+            $this->messenger->addMessage($submission_log_message);
             $submission->setElementData('submission_status', 'ingested');
-            $submission_log_message = 'Ingested!';
+            $submission_log_message = "{$timestamp}: {$submission_log_message}";
           }
 	  else {
-            $this->messenger->addMessage("{$iid}.zip has already been processed by AIS-{$ais_env} but was unsuccessful; see the DigiNole AIS log for more details.");
+	    $submission_log_message = "Submission {$iid} has been ingested by AIS-{$ais_env} but encountered the following error: '{$response['message']}'."; 
+            $this->messenger->addMessage($submission_log_message);
             $submission->setElementData('submission_status', 'error');
-            $submission_log_message = 'Error!';
+            $submission_log_message = "{$timestamp}: {$submission_log_message}";
 	  }
           $submission_log = $submission->getElementData('submission_log');
           $submission_log[] = $submission_log_message;
@@ -183,7 +186,12 @@ class ApprovedSubmissionCommands extends DrushCommands {
           $this->messenger->addMessage("Skipping processing of {$iid}.");
         }
         else {
-          $this->messenger->addMessage("{$iid}.zip not detected in AIS-{$ais_env}, creating package now.");
+	  $submission_log_message = "Submission {$iid} has not been ingested by AIS-{$ais_env}, creating ingest package.";
+          $this->messenger->addMessage($submission_log_message);
+          $submission_log = $submission->getElementData('submission_log');
+          $submission_log[] = "{$timestamp}: {$submission_log_message}";
+          $submission->setElementData('submission_log', $submission_log);
+          $submission->resave();
 
           $template = $this->diginoleSubmissionService->getSubmissionTemplate($submission);
           $template_data = $this->diginoleSubmissionService->getTemplateData($submission);
