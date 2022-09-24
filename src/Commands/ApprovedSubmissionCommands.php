@@ -141,7 +141,6 @@ class ApprovedSubmissionCommands extends DrushCommands {
       foreach ($sids as $sid) {
         $submission = $this->entityTypeManager->getStorage('webform_submission')->load($sid);
         $iid = $this->diginoleSubmissionService->getIID($submission);
-
         $this->messenger->addMessage("Processing {$iid}");
 
         $env = getenv('ENVIRONMENT');
@@ -167,13 +166,20 @@ class ApprovedSubmissionCommands extends DrushCommands {
 
         if ($ais_package_status != 'false') {
 	  $response = json_decode($ais_package_status, TRUE);
-	  // Add code to update submission based on AIS response
 	  if ($response['status'] == 'Success') {
             $this->messenger->addMessage("{$iid}.zip has already been processed by AIS-{$ais_env} to create {$response['message']}. Skipping processing of {$iid}.");
+            $submission->setElementData('submission_status', 'ingested');
+            $submission_log_message = 'Ingested!';
           }
 	  else {
             $this->messenger->addMessage("{$iid}.zip has already been processed by AIS-{$ais_env} but was unsuccessful; see the DigiNole AIS log for more details.");
+            $submission->setElementData('submission_status', 'error');
+            $submission_log_message = 'Error!';
 	  }
+          $submission_log = $submission->getElementData('submission_log');
+          $submission_log[] = $submission_log_message;
+          $submission->setElementData('submission_log', $submission_log);
+          $submission->resave();
           $this->messenger->addMessage("Skipping processing of {$iid}.");
         }
         else {
