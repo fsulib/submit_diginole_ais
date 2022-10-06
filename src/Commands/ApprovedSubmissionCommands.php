@@ -168,7 +168,7 @@ class ApprovedSubmissionCommands extends DrushCommands {
         }
 
 	$timestamp = date('Y-m-d', time());
-        if ($ais_package_status != 'false') {
+        if ($ais_package_status != 'false' && $status != 'rerun') {
 	  $response = json_decode($ais_package_status, TRUE);
 	  if ($response['status'] == 'Success') {
 	    $submission_log_message = "Submission {$iid} has been ingested by AIS-{$ais_env} to create {$response['message']}."; 
