@@ -6,6 +6,7 @@ use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\Template\TwigEnvironment;
 use Drupal\Core\Messenger\Messenger;
 use Drush\Commands\DrushCommands;
+use Drupal\webform\WebformSubmissionForm;
 use Drupal\submit_diginole_ais\DiginoleSubmissionService;
 use Drupal\submit_diginole_ais\SubmitDiginoleFileService;
 use Drupal\submit_diginole_ais\SubmitDiginoleManifestService;
@@ -147,15 +148,17 @@ class ApprovedSubmissionCommands extends DrushCommands {
 	switch ($env) {
           case 'prod':
 	    $ais_env = 'prod';
-	    $url = "https://diginole.lib.fsu.edu/diginole/webservices/ais/package/status/{$iid}.zip";
+	    $base_url = "https://diginole.lib.fsu.edu";
             $this->messenger->addMessage("Checking AIS-prod status of {$iid}.zip...");
             break;
           default:
 	    $ais_env = 'test';
-	    $url = "https://test.diginole.lib.fsu.edu/diginole/webservices/ais/package/status/{$iid}.zip";
+	    $base_url = "https://test.diginole.lib.fsu.edu";
             $this->messenger->addMessage("Checking AIS-test status of {$iid}.zip...");
             break;
         }
+	$ais_api_path = "/diginole/webservices/ais/package/status/";
+	$url = $base_url . $ais_api_path . $iid . ".zip";
 
 	if (!$url) {
           $ais_package_status = 'false';
@@ -171,6 +174,7 @@ class ApprovedSubmissionCommands extends DrushCommands {
 	    $submission_log_message = "Submission {$iid} has been ingested by AIS-{$ais_env} to create {$response['message']}."; 
             $this->messenger->addMessage($submission_log_message);
             $submission->setElementData('submission_status', 'ingested');
+            $submission->setElementData('diginole_purl', $base_url . "/islandora/object/" . $response['message']);
             $submission_log_message = "{$timestamp}: {$submission_log_message}";
           }
 	  else {
@@ -183,6 +187,7 @@ class ApprovedSubmissionCommands extends DrushCommands {
           $submission_log[] = $submission_log_message;
           $submission->setElementData('submission_log', $submission_log);
           $submission->resave();
+	  $submission = WebformSubmissionForm::submitWebformSubmission($submission);
           $this->messenger->addMessage("Skipping processing of {$iid}.");
         }
         else {
@@ -192,7 +197,6 @@ class ApprovedSubmissionCommands extends DrushCommands {
           $submission_log[] = "{$timestamp}: {$submission_log_message}";
           $submission->setElementData('submission_log', $submission_log);
           $submission->resave();
-
           $template = $this->diginoleSubmissionService->getSubmissionTemplate($submission);
           $template_data = $this->diginoleSubmissionService->getTemplateData($submission);
 
