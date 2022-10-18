@@ -51,10 +51,8 @@ class SubmitDiginoleManifestService {
         $period_array = explode('_', $selected_period);
         $months = $period_array[0];
         $date_modifier = '+' . $months . ' month';
-
-        $date = new DateTime('now');
+        $date = new DateTime($submission_data['date_of_submission']);
         $date->modify($date_modifier);
-
         $scholar_expiry = $date->format('Y-m-d');
       }
       else {
