@@ -248,8 +248,17 @@ class DiginoleSubmissionService {
     $template_data = [];
     $submission_data = $submission->getData();
 
-    $template_data['titleInfo_title'] = $submission_data['submission_title'];
+    $exploded_title = explode(' ', $submission_data['submission_title']);
+    $nonsorts = ['The', 'A', 'An', '...'];
+    if (!in_array($exploded_title[0], $nonsorts)) {
+      $template_data['titleInfo_title'] = $submission_data['submission_title'];
+    }
+    else {
+      $template_data['titleInfo_nonSort'] = $exploded_title[0];
+      $template_data['titleInfo_title'] = implode(' ', array_slice($exploded_title, 1));
+    }
     $template_data['titleInfo_subTitle'] = $submission_data['submission_subtitle'];
+
     $template_data['abstract'] = $submission_data['abstract'];
     // need to iterate author
     foreach ($submission_data['author'] as $delta => $author) {
