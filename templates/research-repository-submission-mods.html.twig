@@ -77,6 +77,11 @@
     <titleInfo lang="eng">
       <title>{{ item.publication_title|escape('html') }}</title>
     </titleInfo>
+    {%~ if item.publication_edition|length > 0 %}
+    <originInfo>
+      <edition>{{ item.publication_edition|escape('html') }}</edition>
+    </originInfo>
+    {%~ endif %}
     {%~ if item.publication_volume|length > 0 or item.publication_issue|length > 0 or item.publication_page_range_start|length > 0 %}
     <part>
       {%~ if item.publication_volume|length > 0 %}
