@@ -174,7 +174,8 @@ class ApprovedSubmissionCommands extends DrushCommands {
 	    $submission_log_message = "Submission {$iid} has been ingested by AIS-{$ais_env} to create {$response['message']}."; 
             $this->messenger->addMessage($submission_log_message);
             $submission->setElementData('submission_status', 'ingested');
-            $submission->setElementData('diginole_purl', $base_url . "/islandora/object/" . $response['message']);
+            $purlchecker_response = json_decode(file_get_contents($base_url . '/diginole/webservices/purlchecker/' . $iid), TRUE);
+            $submission->setElementData('diginole_purl', $purlchecker_response['message']);
             $submission_log_message = "{$timestamp}: {$submission_log_message}";
           }
 	  else {
