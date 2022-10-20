@@ -45,8 +45,8 @@
   {%~ if item.note_grantNumber|length > 0 %}
   <note displayLabel="Grant Number">{{ item.note_grantNumber }}</note>
   {%~ endif %}
-  {%~ if item.indentifier_doi|length > 0 %}
-  <identifier type="DOI">{{ item.indentifier_doi }}</identifier>
+  {%~ if item.identifier_doi|length > 0 %}
+  <identifier type="DOI">{{ item.identifier_doi }}</identifier>
   {%~ endif %}
   {%~ if item.isbn|length > 0 %}
   <identifier type="isbn">{{ item.isbn }}</identifier>

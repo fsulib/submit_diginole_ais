@@ -45,8 +45,8 @@
   {%~ if item.note_grantNumber|length > 0 %}
   <note displayLabel="Grant Number">{{ item.note_grantNumber }}</note>
   {%~ endif %}
-  {%~ if item.indentifier_doi|length > 0 %}
-  <identifier type="DOI">{{ item.indentifier_doi }}</identifier>
+  {%~ if item.identifier_doi|length > 0 %}
+  <identifier type="DOI">{{ item.identifier_doi }}</identifier>
   {%~ endif %}
   {%~ if item.accessCondition_text|length > 0 %}
   <accessCondition type="use and reproduction" xlink:href="{{ item.accessCondition_xlink }}">{{ item.accessCondition_text|escape('html') }}</accessCondition>
