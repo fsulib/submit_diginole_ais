@@ -67,6 +67,14 @@ class SubmitDiginoleManifestService {
       $scholar_type = '';
     }
 
+    // doi
+    if (($submission_data['if_a_doi_does_not_already_exist_would_you_like_to_create_one_for'] == 'Yes') || ($submission_data['if_a_doi_does_not_already_exist_would_you_like_to_create_a_doi_f'] == 'Yes')) {
+      $register_doi = 'FSU_' . $submission->uuid();
+    }
+    else {
+      $register_doi = '';
+    }
+
     $manifest = [
       'submitter_email' => $submitter_email,
       'content_model' => $content_model,
@@ -74,6 +82,7 @@ class SubmitDiginoleManifestService {
       'ip_embargo' => $ip_embargo,
       'scholar_expiry' => $scholar_expiry,
       'scholar_type' => $scholar_type,
+      'register_doi' => $register_doi,
     ];
 
     return $manifest;

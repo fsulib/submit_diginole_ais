@@ -2,6 +2,9 @@
 submitter_email = {{ manifest.submitter_email }}
 content_model = {{ manifest.content_model }}
 parent_collection = {{ manifest.parent_collection }}
+{% if manifest.register_doi|length > 0 %}
+register_doi = {{ manifest.register_doi }}
+{% endif %}
 {% if manifest.ip_embargo|length > 0 %}
 
 [ip_embargo]
