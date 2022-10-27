@@ -45,21 +45,15 @@ class SubmitDiginoleManifestService {
     }
 
     // scholar embargo
-    if ((!empty($submission_data['embargo_period'])) && ($submission_data['embargo_period'] != 'none')) {
-      if ($submission_data['embargo_period'] != 'unsure') {
-        $selected_period = $submission_data['embargo_period'];
-        $period_array = explode('_', $selected_period);
-        $months = $period_array[0];
-        $date_modifier = '+' . $months . ' month';
-        $embargo_base_date = (!empty($submission_data['date_of_publication']) ? $submission_data['date_of_publication'] : $submission_data['date_of_submission']);
-        $date = new DateTime($embargo_base_date);
-        $date->modify($date_modifier);
-        $scholar_expiry = $date->format('Y-m-d');
-      }
-      else {
-        $scholar_expiry = 'indefinite';
-      }
-
+    if ((!empty($submission_data['embargo_period'])) && ($submission_data['embargo_period'] != 'none') && ($submission_data['embargo_period'] != 'unsure')) {
+      $selected_period = $submission_data['embargo_period'];
+      $period_array = explode('_', $selected_period);
+      $months = $period_array[0];
+      $date_modifier = '+' . $months . ' month';
+      $embargo_base_date = (!empty($submission_data['date_of_publication']) ? $submission_data['date_of_publication'] : $submission_data['date_of_submission']);
+      $date = new DateTime($embargo_base_date);
+      $date->modify($date_modifier);
+      $scholar_expiry = $date->format('Y-m-d');
       $scholar_type = SubmitDiginoleManifestHelper::getScholarEmbargoDSID($submission_type);
     }
     else {
