@@ -66,7 +66,7 @@ class SubmitDiginoleFileService {
     $original_name = $original_file->getFileName();
     $original_name_parts = explode('.', $original_name);
 
-    $new_name = $iid . '.' . $original_name_parts[1];
+    $new_name = $iid . '.' . end($original_name_parts);
 
     $this->fileSystem->prepareDirectory($destination, FileSystemInterface::CREATE_DIRECTORY);
     $this->fileRepository->copy($original_file, $destination . $new_name, FileSystemInterface::EXISTS_REPLACE);
