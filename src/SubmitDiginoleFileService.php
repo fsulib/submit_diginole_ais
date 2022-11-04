@@ -99,7 +99,7 @@ class SubmitDiginoleFileService {
    *   Data from submission entity 
    */
   public function applyCoverpageToFile($iid, $filename, $submission_data) {
-    $coverpage_formatted_title = !empty($submission_data['submission_subtitle']) ? trim(trim($submission_data['submission_title']), ':') . ": " . $submission_data['submission_subtitle'] : $submission_data['submission_title'];
+    $coverpage_formatted_title = (!empty($submission_data['submission_subtitle']) ? trim(trim($submission_data['submission_title']), ':') . ": " . $submission_data['submission_subtitle'] : $submission_data['submission_title']);
     $coverpage_date = (!empty($submission_data['date_of_publication']) ? $submission_data['date_of_publication'] : $submission_data['date_of_submission']);
     $coverpage_formatted_year = date('Y', strtotime($coverpage_date));
     $coverpage_formatted_author_names = array();
