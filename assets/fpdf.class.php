@@ -1,6 +1,6 @@
 <?php
 
-require_once(__DIR__ . '/tfpdf/tfpdf.php');
+require_once(__DIR__ . '/../vendor/autoload.php');
 
 class FPDF extends tFPDF
 {

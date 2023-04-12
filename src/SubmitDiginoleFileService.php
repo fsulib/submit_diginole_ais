@@ -6,9 +6,10 @@ use Drupal\file\Entity\File;
 use Drupal\Core\File\FileSystemInterface;
 use Drupal\file\FileRepositoryInterface;
 use Drupal\submit_diginole_ais\DiginoleSubmissionService;
+use setasign\Fpdi\Fpdi;
 
+require_once(__DIR__ . '/../vendor/autoload.php');
 require_once(__DIR__ . '/../assets/fpdf.class.php');
-require_once(__DIR__ . '/../assets/FPDI-1.6.1/fpdi.php');
 
 /**
  * class SubmitDiginoleFileService
@@ -121,7 +122,7 @@ class SubmitDiginoleFileService {
     else {
       $coverpage_formatted_authors_string = implode(", ", array_slice($coverpage_formatted_author_names, 0, -2)) . ", " . implode(" and ", array_slice($coverpage_formatted_author_names, -2)); 
     }
-    $coverpage_generated_pdf = new \FPDI();
+    $coverpage_generated_pdf = new Fpdi();
     $coverpage_generated_pdf->AddPage('P', 'Letter');
     $coverpage_generated_pdf->setSourceFile(__DIR__ . '/../assets/coverpage.pdf');
     $tplIdx = $coverpage_generated_pdf->importPage(1);
