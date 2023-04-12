@@ -8,7 +8,6 @@ use Drupal\file\FileRepositoryInterface;
 use Drupal\submit_diginole_ais\DiginoleSubmissionService;
 use setasign\Fpdi\Fpdi;
 
-require_once(__DIR__ . '/../vendor/autoload.php');
 require_once(__DIR__ . '/../assets/fpdf.class.php');
 
 /**
