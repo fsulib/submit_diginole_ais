@@ -11,7 +11,7 @@ else
   BUCKET_ENV='test'
 fi
 
-/var/sites/submit_diginole/vendor/bin/drush ais_process $1 --status=$2
+/var/sites/submit_diginole/vendor/bin/drush ais_process --uri=https://$SUBMIT_DIGINOLE_DOMAIN $1 --status=$2
 
 cd /tmp/ais_packages/
 for PACKAGE in $(ls *)
