@@ -272,8 +272,8 @@ class DiginoleSubmissionService {
     $template_data['note_keywords'] = $submission_data['keywords'];
     $template_data['originInfo_dateIssued'] = $submission_data['date_of_submission'];
     $template_data['note_publicationNote'] = $submission_data['publication_note'];
-    $template_data['accessCondition_text'] = SubmitDiginoleSubmissionHelper::getLicenseLabel($submission_data['license']);
-    $template_data['accessCondition_xlink'] = SubmitDiginoleSubmissionHelper::getLicenseUrl($submission_data['license']);
+    $template_data['accessCondition_text'] = (!empty($submission_data['license']) ? SubmitDiginoleSubmissionHelper::getLicenseLabel($submission_data['license']) : FALSE);
+    $template_data['accessCondition_xlink'] = (!empty($submission_data['license']) ? SubmitDiginoleSubmissionHelper::getLicenseUrl($submission_data['license']) : FALSE);
 
     $template_data['location_purl'] = $submission_data['diginole_purl'];
     $template_data['identifier_iid'] = $this->getIID($submission);

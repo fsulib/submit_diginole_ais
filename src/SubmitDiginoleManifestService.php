@@ -62,8 +62,21 @@ class SubmitDiginoleManifestService {
     }
 
     // doi
-    if (($submission_data['if_a_doi_does_not_already_exist_would_you_like_to_create_one_for'] == 'Yes') || ($submission_data['if_a_doi_does_not_already_exist_would_you_like_to_create_a_doi_f'] == 'Yes')) {
-      $register_doi = 'FSU_' . $submission->uuid();
+    if (isset($submission_data['if_a_doi_does_not_already_exist_would_you_like_to_create_one_for'])) {
+      if ($submission_data['if_a_doi_does_not_already_exist_would_you_like_to_create_one_for'] == 'Yes') {
+        $register_doi = 'FSU_' . $submission->uuid();
+      }
+      else {
+        $register_doi = '';
+      }
+    }
+    elseif (isset($submission_data['if_a_doi_does_not_already_exist_would_you_like_to_create_a_doi_f'])) {
+      if ($submission_data['if_a_doi_does_not_already_exist_would_you_like_to_create_a_doi_f'] == 'Yes') {
+        $register_doi = 'FSU_' . $submission->uuid();
+      }
+      else {
+        $register_doi = '';
+      }
     }
     else {
       $register_doi = '';
