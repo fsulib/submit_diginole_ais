@@ -135,6 +135,10 @@ class DiginoleSubmissionService {
 
     $template_data['identifier_doi'] = array_key_exists('doi', $submission_data) ? $submission_data['doi'] : $submission_data['if_there_is_already_a_doi_associated_with_this_item_please_enter'];
     $template_data['identifier_doi'] = $this->formatDoi($template_data['identifier_doi']);
+
+    if (array_key_exists('submission_type', $submission_data)) {
+      $template_data['submission_type'] = $submission_data['submission_type'];
+    }
     if (array_key_exists('date_of_publication', $submission_data)) {
       $template_data['originInfo_dateIssued'] = $submission_data['date_of_publication'];
     }

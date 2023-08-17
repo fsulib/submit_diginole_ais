@@ -9,7 +9,7 @@
     <subTitle>{{ item.titleInfo_subTitle|escape('html') }}</subTitle>
     {%~ endif %}
   </titleInfo>
-  {% for author in item.author %}
+  {%~ for author in item.author %}
   <name type="personal" authority="local">
     <namePart type="given">{{ author.name_namePart_given }}</namePart>
     <namePart type="family">{{ author.name_namePart_family }}</namePart>
@@ -20,12 +20,17 @@
     <nameIdentifier type="orcid">{{ author.name_nameIdentifier_orcid|escape('html') }}</nameIdentifier>
     {%~ endif %}
     <role>
+      {%~ if item.submission_type|length > 0 and item.submission_type == "3d_object" %}
+      <roleTerm authority="rda" type="text">creator</roleTerm>
+      <roleTerm authority="marcrelator" type="code">cre</roleTerm>
+      {%~ else %}
       <roleTerm authority="rda" type="text">author</roleTerm>
       <roleTerm authority="marcrelator" type="code">aut</roleTerm>
+      {%~ endif %}
     </role>
   </name>
-  {% endfor %}
-  {%~ if item.originInfo_dateIssued|length > 0 -%}
+  {%~ endfor %}
+  {%~ if item.originInfo_dateIssued|length > 0 %}
   <originInfo>
     <dateIssued encoding="w3cdtf" keyDate="yes">{{ item.originInfo_dateIssued }}</dateIssued>
   </originInfo>

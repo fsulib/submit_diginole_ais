@@ -25,7 +25,7 @@
     </role>
   </name>
   {%~ endfor %}
-  {%~ if item.originInfo_dateIssued|length > 0 -%}
+  {%~ if item.originInfo_dateIssued|length > 0 %}
   <originInfo>
     <dateIssued encoding="w3cdtf" keyDate="yes">{{ item.originInfo_dateIssued }}</dateIssued>
   </originInfo>
