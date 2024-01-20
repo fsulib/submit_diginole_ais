@@ -33,7 +33,7 @@ class SubmitDiginoleManifestService {
       $submission_type = $submission_form;
     }
     $submitter_email = $submission_data['email'];
-    $content_model = SubmitDiginoleManifestHelper::getCModel($submission_type);
+    $content_model = SubmitDiginoleManifestHelper::getCModel($submission_type, $submission);
     $parent_collection = !empty($submission_data['diginole_collection']) ? $submission_data['diginole_collection'] : '';
 
     // ip_embargo
