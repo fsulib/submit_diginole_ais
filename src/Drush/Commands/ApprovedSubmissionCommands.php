@@ -1,5 +1,6 @@
 <?php
-namespace Drupal\submit_diginole_ais\Commands;
+
+namespace Drupal\submit_diginole_ais\Drush\Commands;
 
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
@@ -105,88 +106,6 @@ class ApprovedSubmissionCommands extends DrushCommands {
     $this->twigService = $twigService;
     $this->submitDiginoleFileService = $submitDiginoleFileService;
     $this->submitDiginoleManifestService = $submitDiginoleManifestService;
-  }
-
-  /**
-   * Purge old ingested DigiNole submissions
-   *
-   * @command submit_diginole_ais:purge_submissions
-   * @aliases ais_purge
-   *
-   * @param string $webform
-   *    The machine name of the webform providing submissions
-   * @option dryrun
-   *   Whether or not to run in dryrun mode, which shows how many submissions would be deleted but does not actually delete them 
-   * 
-   * @usage submit_diginole_ais:purge_submissions honors_thesis_submission --dryrun=true
-   */
-  public function purgeSubmissions($webform, $options = ['dryrun' => FALSE]) {
-    $webformChoices = ["honors_thesis_submission","research_repository_submission","university_records_submission"];
-    if (!in_array($webform, $webformChoices)) {
-      $this->messenger->addError(dt('You passed an incorrect parameter value. Accepted values are: "honors_thesis_submission","research_repository_submission","university_records_submission"'));
-    }
-    else {
-      if ($options['dryrun']) {
-        $dryrun = TRUE;
-        $this->messenger->addMessage("Running in 'dryrun' mode. Submissions will not actually be deleted.");
-      }
-      else {
-        $dryrun = FALSE;
-      }
-      $this->messenger->addMessage("Beginning process of purging old ingested submissions in {$webform} webform.");
-      $current_time = time();
-      $purge_stats = array();
-      $purge_stats['webform'] = $webform;
-      $purge_stats['dryrun'] = ($dryrun) ? 'Yes' : 'No';
-      $purge_stats['start'] = time();
-      $purge_stats['fresh'] = 0;
-      $purge_stats['stale'] = 0;
-
-      $sids = $this->diginoleSubmissionService->getSidsByFormAndStatus($webform, 'ingested');
-      $count = count($sids);
-      $purge_stats['ingested'] = $count;
-      $this->messenger->addMessage("{$count} ingested submissions detected for {$webform} webform.");
-      
-      if ($count > 0) {
-        foreach ($sids as $sid) {
-          $this->messenger->addMessage("Analyzing submission #{$sid}...");
-          $submission = $this->entityTypeManager->getStorage('webform_submission')->load($sid);
-          $changed_time = $submission->getChangedTime();
-          $changed_date = date('Y-m-d', $changed_time); 
-          $stale_time = $current_time - $changed_time; 
-          $stale_days = intdiv($stale_time, 86400); 
-          $this->messenger->addMessage("Submission #{$sid} last changed {$changed_date}, {$stale_days} days ago.");
-          if ($stale_days > 60) {
-            $purge_stats['stale']++;
-            $this->messenger->addMessage("Submission #{$sid} over 60 days stale, and will be purged.");
-            if (!$dryrun) {
-              $submission->delete();
-              $this->messenger->addMessage("Submission #{$sid} purged.");
-            }
-            else {
-              $this->messenger->addMessage("Submission #{$sid} purged (jk lol, #dryrun)");
-            }
-          }
-          else {
-            $purge_stats['fresh']++;
-            $this->messenger->addMessage("Submission #{$sid} is less than 60 days stale, and will not be purged.");
-          }
-        }
-      }
-      $purge_stats['end'] = time();
-      $purge_stats['length'] = intdiv($purge_stats['end'] - $purge_stats['start'], 60);
-      $purge_stats_msg = "submit_diginole_ais purge run log:<br>";
-      $purge_stats_msg .= "Run Date: " . date("Y-m-d", $purge_stats['start']) . "<br>"; 
-      $purge_stats_msg .= "Run Duration: " . $purge_stats['length'] . " minutes (" . $purge_stats['start'] . " - " . $purge_stats['end'] . ")<br>"; 
-      $purge_stats_msg .= "Target Webform: {$purge_stats['webform']}<br>";
-      $purge_stats_msg .= "Dryrun: {$purge_stats['dryrun']}<br>";
-      $purge_stats_msg .= "Total ingested submissions: {$purge_stats['ingested']}<br>";
-      $purge_stats_msg .= "Ingested submissions still fresh: {$purge_stats['fresh']}<br>";
-      $purge_stats_msg .= "Stale ingested submissions purged: {$purge_stats['stale']}<br>";
-
-      $this->messenger->addMessage($purge_stats_msg);
-      \Drupal::logger('submit_diginole_ais_purge_log')->info($purge_stats_msg);
-    }
   }
 
 
@@ -414,6 +333,137 @@ class ApprovedSubmissionCommands extends DrushCommands {
 
     $this->messenger->addMessage($run_stats_msg);
     \Drupal::logger('submit_diginole_ais_processing_log')->info($run_stats_msg);
+  }
+
+
+  /**
+   * Purge old ingested DigiNole submissions
+   *
+   * @command submit_diginole_ais:purge_submissions
+   * @aliases ais_purge
+   *
+   * @param string $webform
+   *    The machine name of the webform providing submissions
+   * @option dryrun
+   *   Whether or not to run in dryrun mode, which shows how many submissions would be deleted but does not actually delete them 
+   * 
+   * @usage submit_diginole_ais:purge_submissions honors_thesis_submission --dryrun=true
+   */
+  public function purgeSubmissions($webform, $options = ['dryrun' => FALSE]) {
+    $webformChoices = ["honors_thesis_submission","research_repository_submission","university_records_submission"];
+    if (!in_array($webform, $webformChoices)) {
+      $this->messenger->addError(dt('You passed an incorrect parameter value. Accepted values are: "honors_thesis_submission","research_repository_submission","university_records_submission"'));
+    }
+    else {
+      if ($options['dryrun']) {
+        $dryrun = TRUE;
+        $this->messenger->addMessage("Running in 'dryrun' mode. Submissions will not actually be deleted.");
+      }
+      else {
+        $dryrun = FALSE;
+      }
+      $this->messenger->addMessage("Beginning process of purging old ingested submissions in {$webform} webform.");
+      $current_time = time();
+      $purge_stats = array();
+      $purge_stats['webform'] = $webform;
+      $purge_stats['dryrun'] = ($dryrun) ? 'Yes' : 'No';
+      $purge_stats['start'] = time();
+      $purge_stats['fresh'] = 0;
+      $purge_stats['stale'] = 0;
+
+      $sids = $this->diginoleSubmissionService->getSidsByFormAndStatus($webform, 'ingested');
+      $count = count($sids);
+      $purge_stats['ingested'] = $count;
+      $this->messenger->addMessage("{$count} ingested submissions detected for {$webform} webform.");
+      
+      if ($count > 0) {
+        foreach ($sids as $sid) {
+          $this->messenger->addMessage("Analyzing submission #{$sid}...");
+          $submission = $this->entityTypeManager->getStorage('webform_submission')->load($sid);
+          $changed_time = $submission->getChangedTime();
+          $changed_date = date('Y-m-d', $changed_time); 
+          $stale_time = $current_time - $changed_time; 
+          $stale_days = intdiv($stale_time, 86400); 
+          $this->messenger->addMessage("Submission #{$sid} last changed {$changed_date}, {$stale_days} days ago.");
+          if ($stale_days > 60) {
+            $purge_stats['stale']++;
+            $this->messenger->addMessage("Submission #{$sid} over 60 days stale, and will be purged.");
+            if (!$dryrun) {
+              $submission->delete();
+              $this->messenger->addMessage("Submission #{$sid} purged.");
+            }
+            else {
+              $this->messenger->addMessage("Submission #{$sid} purged (jk lol, #dryrun)");
+            }
+          }
+          else {
+            $purge_stats['fresh']++;
+            $this->messenger->addMessage("Submission #{$sid} is less than 60 days stale, and will not be purged.");
+          }
+        }
+      }
+      $purge_stats['end'] = time();
+      $purge_stats['length'] = intdiv($purge_stats['end'] - $purge_stats['start'], 60);
+      $purge_stats_msg = "submit_diginole_ais purge run log:<br>";
+      $purge_stats_msg .= "Run Date: " . date("Y-m-d", $purge_stats['start']) . "<br>"; 
+      $purge_stats_msg .= "Run Duration: " . $purge_stats['length'] . " minutes (" . $purge_stats['start'] . " - " . $purge_stats['end'] . ")<br>"; 
+      $purge_stats_msg .= "Target Webform: {$purge_stats['webform']}<br>";
+      $purge_stats_msg .= "Dryrun: {$purge_stats['dryrun']}<br>";
+      $purge_stats_msg .= "Total ingested submissions: {$purge_stats['ingested']}<br>";
+      $purge_stats_msg .= "Ingested submissions still fresh: {$purge_stats['fresh']}<br>";
+      $purge_stats_msg .= "Stale ingested submissions purged: {$purge_stats['stale']}<br>";
+
+      $this->messenger->addMessage($purge_stats_msg);
+      \Drupal::logger('submit_diginole_ais_purge_log')->info($purge_stats_msg);
+    }
+  }
+
+
+  /**
+   * Resave DigiNole submissions
+   *
+   * @command submit_diginole_ais:resave_submissions
+   * @aliases ais_resave
+   *
+   * @param string $webform
+   *    The machine name of the webform providing submissions
+   * @option dryrun
+   *   Whether or not to run in dryrun mode, which shows how many submissions would be resaved but does not actually resave them 
+   * 
+   * @usage submit_diginole_ais:purge_submissions honors_thesis_submission --dryrun=true
+   */
+  public function resaveSubmissions($webform, $options = ['dryrun' => FALSE]) {
+    $webformChoices = ["honors_thesis_submission","research_repository_submission","university_records_submission"];
+    if (!in_array($webform, $webformChoices)) {
+      $this->messenger->addError(dt('You passed an incorrect parameter value. Accepted values are: "honors_thesis_submission","research_repository_submission","university_records_submission"'));
+    }
+    else {
+      if ($options['dryrun']) {
+        $dryrun = TRUE;
+        $this->messenger->addMessage("Running in 'dryrun' mode. Submissions will not actually be resaved.");
+      }
+      else {
+        $dryrun = FALSE;
+      }
+      $this->messenger->addMessage("Beginning process of resaving submissions in {$webform} webform.");
+      $date = date('Y-m-d', time());
+      $sids = $this->diginoleSubmissionService->getSidsByForm($webform);
+      $count = count($sids);
+      $this->messenger->addMessage("{$count} submissions detected for {$webform} webform.");
+      
+      if ($count > 0) {
+        foreach ($sids as $sid) {
+          $this->messenger->addMessage("Resaving submission #{$sid}...");
+          if (!$dryrun) {
+            $submission = $this->entityTypeManager->getStorage('webform_submission')->load($sid);
+            $submission_log = $submission->getElementData('submission_log');
+            $submission_log[] = "Submission reindexed by drush ais_resave at {$date}";
+            $submission->setElementData('submission_log', $submission_log);
+            $submission->resave();
+          }
+        }
+      }
+    }
   }
 
 }

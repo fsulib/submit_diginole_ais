@@ -28,12 +28,18 @@ class DiginoleSubmissionService {
     $this->webformQuery = $webform_query;
   }
 
+  public function getSidsByForm(string $webform) {
+    $query = $this->webformQuery;
+    $query->setWebform($webform);
+    $results = $query->processQuery()->fetchCol();
+    return $results;
+  }
+
   public function getSidsByFormAndStatus(string $webform, string $status) {
     $query = $this->webformQuery;
     $query->setWebform($webform)
           ->addCondition('submission_status', $status);
     $results = $query->processQuery()->fetchCol();
-
     return $results;
   }
 
