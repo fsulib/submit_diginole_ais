@@ -10,7 +10,6 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 
 final class SubmitDiginoleAisCommands extends DrushCommands {
 
-
   /**
    * ais_process
    */
