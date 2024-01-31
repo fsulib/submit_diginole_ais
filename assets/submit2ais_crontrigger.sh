@@ -1,7 +1,7 @@
 #/usr/bin/env bash
 
 echo "$(date): submit2ais_crontrigger.sh activated"
-echo "Processing $2 submissions from the $1 webform"
+echo "Processing submissions from the $1 webform"
 
 source /etc/environment
 if [[ "$ENVIRONMENT" == "prod" ]]
@@ -11,7 +11,7 @@ else
   BUCKET_ENV='test'
 fi
 
-/var/sites/submit_diginole/vendor/bin/drush ais_process --uri=https://$SUBMIT_DIGINOLE_DOMAIN $1 --status=$2
+/var/sites/submit_diginole/vendor/bin/drush ais_process --uri=https://$SUBMIT_DIGINOLE_DOMAIN $1
 
 cd /tmp/ais_packages/
 for PACKAGE in $(ls *)
