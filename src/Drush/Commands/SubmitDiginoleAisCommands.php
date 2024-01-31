@@ -295,7 +295,6 @@ final class SubmitDiginoleAisCommands extends DrushCommands {
     $sids = \Drupal::service('submit_diginole_ais.submission_service')->getSidsByForm($webform_id);
     $count = count($sids);
     \Drupal::messenger()->addMessage("{$count} submissions detected for {$webform_id} webform.");
-
     if ($count > 0) {
       foreach ($sids as $sid) {
         \Drupal::messenger()->addMessage("Resaved submission #{$sid}.");
