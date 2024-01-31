@@ -54,12 +54,10 @@ final class SubmitDiginoleAisCommands extends DrushCommands {
       $purge_stats['start'] = time();
       $purge_stats['fresh'] = 0;
       $purge_stats['stale'] = 0;
-
       $sids = \Drupal::service('submit_diginole_ais.submission_service')->getSidsByFormAndStatus($webform_id, 'ingested');
       $count = count($sids);
       $purge_stats['ingested'] = $count;
       \Drupal::messenger()->addMessage("{$count} ingested submissions detected for {$webform_id} webform.");
-      
       if ($count > 0) {
         foreach ($sids as $sid) {
           \Drupal::messenger()->addMessage("Analyzing submission #{$sid}...");
@@ -87,7 +85,6 @@ final class SubmitDiginoleAisCommands extends DrushCommands {
         }
       }
     }
-
   }
 
   /**
