@@ -8,67 +8,100 @@ use Drush\Attributes as CLI;
 use Drush\Commands\DrushCommands;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
-/**
- * A Drush commandfile.
- *
- * In addition to this file, you need a drush.services.yml
- * in root of your module, and a composer.json file that provides the name
- * of the services file to use.
- */
 final class SubmitDiginoleAisCommands extends DrushCommands {
 
+
   /**
-   * Constructs a SubmitDiginoleAisCommands object.
+   * ais_process
    */
-  public function __construct(
-    private readonly Token $token,
-  ) {
-    parent::__construct();
+  #[CLI\Command(name: 'submit_diginole_ais:process_submissions', aliases: ['ais_process'])]
+  #[CLI\Argument(name: 'webform_id', description: 'String ID of the webform to process from')]
+  #[CLI\Argument(name: 'submission_status', description: 'Status of submissions to process')]
+  #[CLI\Option(name: 'dryrun', description: 'Run in dryrun mode where nothing is actually processed')]
+  #[CLI\Usage(name: 'drush ais_process research_repository_submission approved', description: 'Processes approved submissions from the research_repository_submission webform')]
+  public function process($webform_id, $submission_status, $options = ['dryrun' => FALSE]) {
+    $message = "Processing {$submission_status} submissions from the {$webform_id} webform";
+    if ($options['dryrun']) {
+      $message .= " in dryrun mode";
+    }
+    $this->logger()->success($message);
   }
 
   /**
-   * {@inheritdoc}
+   * ais_purge
    */
-  public static function create(ContainerInterface $container) {
-    return new static(
-      $container->get('token'),
-    );
-  }
+  #[CLI\Command(name: 'submit_diginole_ais:purge_submissions', aliases: ['ais_purge'])]
+  #[CLI\Argument(name: 'webform_id', description: 'String ID of the webform to purge from')]
+  #[CLI\Option(name: 'dryrun', description: 'Run in dryrun mode where nothing is actually purged')]
+  public function purge($webform_id, $options = ['dryrun' => FALSE]) {
+    $webformChoices = ["honors_thesis_submission","research_repository_submission","university_records_submission"];
+    if (!in_array($webform_id, $webformChoices)) {
+      \Drupal::messenger()->addError(dt('You passed an incorrect parameter value. Accepted values are: "honors_thesis_submission","research_repository_submission","university_records_submission"'));
+    }
+    else {
+      if ($options['dryrun']) {
+        $dryrun = TRUE;
+        \Drupal::messenger()->addMessage("Running in 'dryrun' mode. Submissions will not actually be deleted.");
+      }
+      else {
+        $dryrun = FALSE;
+      }
+      \Drupal::messenger()->addMessage("Beginning process of purging old ingested submissions in {$webform_id} webform.");
+      $current_time = time();
+      $purge_stats = array();
+      $purge_stats['webform'] = $webform_id;
+      $purge_stats['dryrun'] = ($dryrun) ? 'Yes' : 'No';
+      $purge_stats['start'] = time();
+      $purge_stats['fresh'] = 0;
+      $purge_stats['stale'] = 0;
 
-  /**
-   * Command description here.
-   */
-  #[CLI\Command(name: 'submit_diginole_ais:command-name', aliases: ['foo'])]
-  #[CLI\Argument(name: 'arg1', description: 'Argument description.')]
-  #[CLI\Option(name: 'option-name', description: 'Option description')]
-  #[CLI\Usage(name: 'submit_diginole_ais:command-name foo', description: 'Usage description')]
-  public function commandName($arg1, $options = ['option-name' => 'default']) {
-    $this->logger()->success(dt('Achievement unlocked.'));
-  }
-
-  /**
-   * An example of the table output format.
-   */
-  #[CLI\Command(name: 'submit_diginole_ais:token', aliases: ['token'])]
-  #[CLI\FieldLabels(labels: [
-    'group' => 'Group',
-    'token' => 'Token',
-    'name' => 'Name'
-  ])]
-  #[CLI\DefaultTableFields(fields: ['group', 'token', 'name'])]
-  #[CLI\FilterDefaultField(field: 'name')]
-  public function token($options = ['format' => 'table']): RowsOfFields {
-    $all = $this->token->getInfo();
-    foreach ($all['tokens'] as $group => $tokens) {
-      foreach ($tokens as $key => $token) {
-        $rows[] = [
-          'group' => $group,
-          'token' => $key,
-          'name' => $token['name'],
-        ];
+      $sids = \Drupal::service('submit_diginole_ais.submission_service')->getSidsByFormAndStatus($webform_id, 'ingested');
+      $count = count($sids);
+      $purge_stats['ingested'] = $count;
+      \Drupal::messenger()->addMessage("{$count} ingested submissions detected for {$webform_id} webform.");
+      
+      if ($count > 0) {
+        foreach ($sids as $sid) {
+          \Drupal::messenger()->addMessage("Analyzing submission #{$sid}...");
+          $submission = \Drupal::entityTypeManager()->getStorage('webform_submission')->load($sid);
+          $changed_time = $submission->getChangedTime();
+          $changed_date = date('Y-m-d', $changed_time); 
+          $stale_time = $current_time - $changed_time; 
+          $stale_days = intdiv($stale_time, 86400); 
+          \Drupal::messenger()->addMessage("Submission #{$sid} last changed {$changed_date}, {$stale_days} days ago.");
+          if ($stale_days > 0) {
+            $purge_stats['stale']++;
+            \Drupal::messenger()->addMessage("Submission #{$sid} over 60 days stale, and will be purged.");
+            if (!$dryrun) {
+              $submission->delete();
+              \Drupal::messenger()->addMessage("Submission #{$sid} purged.");
+            }
+            else {
+              \Drupal::messenger()->addMessage("Submission #{$sid} purged (jk lol, #dryrun)");
+            }
+          }
+          else {
+            $purge_stats['fresh']++;
+            \Drupal::messenger()->addMessage("Submission #{$sid} is less than 60 days stale, and will not be purged.");
+          }
+        }
       }
     }
-    return new RowsOfFields($rows);
+
+  }
+
+  /**
+   * ais_resave
+   */
+  #[CLI\Command(name: 'submit_diginole_ais:resave_submissions', aliases: ['ais_resave'])]
+  #[CLI\Argument(name: 'webform_id', description: 'String ID of the webform to resave from')]
+  #[CLI\Option(name: 'dryrun', description: 'Run in dryrun mode where nothing is actually resaved')]
+  public function resave($webform_id, $options = ['dryrun' => FALSE]) {
+    $message = "Resaving all submissions from the {$webform_id} webform";
+    if ($options['dryrun']) {
+      $message .= " in dryrun mode";
+    }
+    $this->logger()->success($message);
   }
 
 }
