@@ -296,6 +296,7 @@ final class SubmitDiginoleAisCommands extends DrushCommands {
     $count = count($sids);
     \Drupal::messenger()->addMessage("{$count} submissions detected for {$webform_id} webform.");
     if ($count > 0) {
+      \Drupal::configFactory()->getEditable('smtp.settings')->set('smtp_on', FALSE)->save(TRUE);
       foreach ($sids as $sid) {
         \Drupal::messenger()->addMessage("Resaved submission #{$sid}.");
         $submission = \Drupal::entityTypeManager()->getStorage('webform_submission')->load($sid);
@@ -306,6 +307,7 @@ final class SubmitDiginoleAisCommands extends DrushCommands {
         $submission = WebformSubmissionForm::submitWebformSubmission($submission);
         \Drupal::messenger()->addMessage("Resaved submission #{$sid}.");
       }
+      \Drupal::configFactory()->getEditable('smtp.settings')->set('smtp_on', TRUE)->save(TRUE);
     }
   }
 
