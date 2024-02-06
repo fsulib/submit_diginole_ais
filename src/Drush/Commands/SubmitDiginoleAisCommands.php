@@ -247,7 +247,7 @@ final class SubmitDiginoleAisCommands extends DrushCommands {
         $stale_time = $current_time - $changed_time; 
         $stale_days = intdiv($stale_time, 86400); 
         \Drupal::messenger()->addMessage("Submission #{$sid} last changed {$changed_date}, {$stale_days} days ago.");
-        if ($stale_days > 0) {
+        if ($stale_days > 60) {
           $purge_stats['stale']++;
           \Drupal::messenger()->addMessage("Submission #{$sid} over 60 days stale, and will be purged.");
           if (!$dryrun) {
@@ -264,6 +264,8 @@ final class SubmitDiginoleAisCommands extends DrushCommands {
         }
       }
     }
+    $purge_stats_msg = $purge_stats['stale'] . ' stale submissions purged, ' . $purge_stats['fresh'] . ' submissions spared.';
+    \Drupal::messenger()->addMessage($purge_stats_msg);
   }
 
   /**
