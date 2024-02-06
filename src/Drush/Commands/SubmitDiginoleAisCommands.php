@@ -75,7 +75,7 @@ final class SubmitDiginoleAisCommands extends DrushCommands {
         $ais_package_status = file_get_contents($url);
       }
       $timestamp = date('Y-m-d', time());
-      if ($ais_package_status != 'false' && $status != 'rerun') {
+      if ($ais_package_status != 'false') {
         $response = json_decode($ais_package_status, TRUE);
         if ($response['status'] == 'Success') {
           $run_stats['succeeded'][] = "{$sid} / {$iid}";
