@@ -127,10 +127,6 @@ final class SubmitDiginoleAisCommands extends DrushCommands {
         if (!empty($fid)) {
           $filename = \Drupal::service('submit_diginole_ais.file_service')->transferSubmissionFile($fid, $destination_folder, $iid);
           \Drupal::messenger()->addMessage('Saved file ' . $filename);
-          if (pathinfo("/tmp/ais_submissions/{$iid}/{$filename}", PATHINFO_EXTENSION) == 'pdf') {
-            \Drupal::service('submit_diginole_ais.file_service')->applyCoverpageToFile($iid, $filename, $submission->getData());
-            \Drupal::messenger()->addMessage('Coverpaging ' . $filename);
-          }
         }
         else {
           $message = 'Could not find attached file for ' . $iid;
