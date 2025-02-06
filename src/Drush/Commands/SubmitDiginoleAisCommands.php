@@ -57,12 +57,12 @@ final class SubmitDiginoleAisCommands extends DrushCommands {
       switch ($env) {
         case 'prod':
           $ais_env = 'prod';
-          $base_url = "https://diginole.lib.fsu.edu";
+          $base_url = "https://repository.lib.fsu.edu";
           \Drupal::messenger()->addMessage("Checking AIS-prod status of {$iid}.zip...");
           break;
         default:
           $ais_env = 'test';
-          $base_url = "https://test.diginole.lib.fsu.edu";
+          $base_url = "https://test.repository.lib.fsu.edu";
           \Drupal::messenger()->addMessage("Checking AIS-test status of {$iid}.zip...");
           break;
       }
