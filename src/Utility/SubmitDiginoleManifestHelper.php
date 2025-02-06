@@ -59,7 +59,7 @@ use Drupal\webform\Entity\WebformSubmission;
     }
     $file = \Drupal\file\Entity\File::load($fid);
     $file_name = $file->get('filename')->value;
-    $file_extension = pathinfo($file_name, PATHINFO_EXTENSION);
+    $file_extension = strtolower(pathinfo($file_name, PATHINFO_EXTENSION));
 
     $cModelCrosswalk = [
       "bmp" => "islandora:sp_basic_image",
