@@ -67,12 +67,19 @@ final class SubmitDiginoleAisCommands extends DrushCommands {
           break;
       }
       $ais_api_path = "/diginole/webservices/ais/package/status/";
+      $ais_api_options = array(
+        'http'=>array(
+          'method'=>"GET",
+          'header'=>"User-Agent: FSU Libraries Repository Submission System Processor/1.0\r\n" 
+        )
+      );
+      $ais_api_context = stream_context_create($ais_api_options);
       $url = $base_url . $ais_api_path . $iid . ".zip";
       if (!$url) {
         $ais_package_status = 'false';
       }
       else {
-        $ais_package_status = file_get_contents($url);
+        $ais_package_status = file_get_contents($url, false, $ais_api_context);
       }
       $timestamp = date('Y-m-d', time());
       if ($ais_package_status != 'false') {
@@ -82,7 +89,7 @@ final class SubmitDiginoleAisCommands extends DrushCommands {
           $submission_log_message = "Submission {$iid} has been ingested by AIS-{$ais_env} to create {$response['message']}."; 
           \Drupal::messenger()->addMessage($submission_log_message);
           $submission->setElementData('submission_status', 'ingested');
-          $purlchecker_response = json_decode(file_get_contents($base_url . '/diginole/webservices/purlchecker/' . $iid), TRUE);
+          $purlchecker_response = json_decode(file_get_contents($base_url . '/diginole/webservices/purlchecker/' . $iid, false, $ais_api_context), TRUE);
           $submission->setElementData('diginole_purl', $purlchecker_response['message']);
           $submission_log_message = "{$timestamp}: {$submission_log_message}";
         }
