@@ -70,7 +70,7 @@ final class SubmitDiginoleAisCommands extends DrushCommands {
       $ais_api_options = array(
         'http'=>array(
           'method'=>"GET",
-          'header'=>"User-Agent: FSU Libraries Repository Submission System Processor/1.0\r\n" 
+          'header'=>"User-Agent: FSU Libraries Digital Repository Submission System Processor/1.0\r\n" 
         )
       );
       $ais_api_context = stream_context_create($ais_api_options);
